@@ -155,7 +155,7 @@ export function mountInstrument(root: HTMLElement, instrument: Instrument): void
       const voiceId = el('span', 'voice-number', String(m.voice + 1).padStart(2, '0'));
       const name = button(m.label, () => { if (design) return; releaseEdit(); instrument.selectVoice(m.voice); }, 'strip-name');
       stripHead.append(voiceId, name);
-      const hit = button('● Hit', () => { if (!design) void instrument.audition(m.voice).catch(report); }, 'hit-button'); hit.setAttribute('aria-label', `Audition ${VOICES[m.voice]}`);
+      const hit = button('● Hit', () => { void instrument.audition(m.voice).catch(report); }, 'hit-button'); hit.setAttribute('aria-label', `Audition ${VOICES[m.voice]}`);
       const mute = button('M', () => { if (design) return; const t = app.project.tracks[m.voice]!; app.setTrackMix(t.id, { mute: !t.mix.mute }); }, 'mute-button'); mute.setAttribute('aria-label', `Mute ${VOICES[m.voice]}`);
       stripHead.append(hit, mute); strip.append(stripHead);
       const controlArea = el('div', 'control-area'); strip.append(controlArea);

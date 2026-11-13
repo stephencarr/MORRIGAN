@@ -75,6 +75,11 @@ test('design controls persist independently and do not alter the musical paramet
   await boot(page);
   const before = await page.evaluate(() => [...window.morrigan.project.kit.synth.params]);
   await page.getByTestId('design-mode').click();
+  for (const [voice, name] of ['DRUM 1', 'DRUM 2', 'DRUM 3', 'SNARE', 'CYMBAL', 'HIHAT'].entries()) {
+    await page.getByRole('button', { name: `Audition ${name}`, exact: true }).click();
+    await expect.poll(() => page.evaluate(v => window.morrigan.app.meters?.tracks[v] ?? 0, voice), { intervals: [20] }).toBeGreaterThan(0.001);
+  }
+  expect(await page.evaluate(() => window.morrigan.app.ui.playing)).toBe(false);
   await page.getByTestId('panel-control-v0-c0').click();
   await page.getByRole('textbox', { name: 'Control label' }).fill('My pitch');
   await page.getByRole('textbox', { name: 'Control label' }).press('Tab');
