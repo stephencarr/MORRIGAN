@@ -50,3 +50,13 @@ MORRIGAN is a modified version of CLATTER and the LXR engine, not an official Er
 ## GitHub Pages
 
 The Pages workflow builds and tests both interfaces, then deploys `dist` after a push to `main`. In repository Settings → Pages, select **GitHub Actions** as the source. The Pages root opens MORRIGAN; the comparison workstation is at `clatter.html`. No custom domain or external backend is required.
+
+## MIDI input
+
+Open **MIDI input** near the transport and click **Enable MIDI**, allowing the browser's MIDI permission. A sole connected input is selected automatically; otherwise choose a device. Use a browser with Web MIDI support (Chrome or Edge recommended). No SysEx access is requested. MIDI and audio are enabled only after your click.
+
+Default mapping uses MIDI note numbers: Drum 1 **36**, Drum 2 **45**, Drum 3 **50**, Snare **38**, Cymbal **49**, Closed hat **42**, Open hat **46**. Configure your controller's pads to those numbers. Velocity is preserved; open and closed hats share the same voice. Unmapped notes, note-offs, and CC messages are ignored. Select All channels or a particular input channel.
+
+**Follow MIDI clock / Start / Stop** is optional and off initially. It follows incoming tempo and transport using CLATTER's existing tempo follower, not phase-locked synchronization. Playing MIDI notes auditions the voices; it does not record into the sequence. Controller-knob/CC assignments and MIDI learn are not implemented. No MIDI output is opened, preventing MIDI-thru feedback.
+
+The device is automatically reattached after unplug/replug. MIDI permission refusal or an unsupported browser leaves the internal instrument playable. Connection choices are temporary for the current page session. Automated tests simulate MIDI devices and feed the real audio engine; physical hardware compatibility must be checked with your controller.

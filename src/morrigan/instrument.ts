@@ -4,6 +4,7 @@ import { defaultMix, defaultPlay, defaultProject, defaultSound } from '../model/
 import { clone, type Project, type Role, type SynthKit, type Track } from '../model/types';
 import { PAR, VOICES, voiceOfParam } from '../sound/lxrParams';
 import { lockableParam } from '../sound/stepSound';
+import { InstrumentMidi } from './midi';
 
 const ROLES: Role[] = ['kick', 'ltom', 'htom', 'snare', 'cymbal', 'chat'];
 
@@ -44,10 +45,11 @@ const isStep = (s: number) => Number.isInteger(s) && s >= 0 && s < 16;
 
 export class Instrument {
   readonly app: App;
+  readonly midi: InstrumentMidi;
   selectedVoice = 0;
   heldStep: number | null = null;
 
-  constructor(app = new App({ trackCount: 6, session: false })) { this.app = app; }
+  constructor(app = new App({ trackCount: 6, session: false })) { this.app = app; this.midi = new InstrumentMidi(app); }
   get project(): Project { return this.app.project; }
   get track(): Track { return this.project.tracks[this.selectedVoice]!; }
 

@@ -1,4 +1,5 @@
 import { Instrument } from './instrument';
+import { midiPanel } from './midiView';
 import { type PanelDocument, type PanelControl, type VoiceModule, defaultPanel, loadPanel, savePanel, repairPanel, serializePanel, parameterChoices, updateControl, reassignControl, findOverlaps, controlValue } from './panel';
 import { configureEffects, silence, setDelaySend, setReverbSend, setDelay, setReverb, setInsert, getInsert, type InsertType } from './effects';
 import { PAR } from '../sound/lxrParamIds';
@@ -55,6 +56,7 @@ export function mountInstrument(root: HTMLElement, instrument: Instrument): void
   const notice = el('div', 'notice'); notice.setAttribute('role', 'status'); shell.append(notice);
   function report(error: unknown): void { notice.textContent = error instanceof Error ? error.message : String(error); }
   app.host.onState(state => { if (state === 'failed') report(`Audio could not start: ${app.host.error}. Press Play or Hit to retry.`); });
+  const midi = midiPanel(instrument.midi); shell.append(midi.element); globalUpdates.push(midi.refresh);
   function persist(next: PanelDocument): void {
     designUndo.push(panel); if (designUndo.length > 40) designUndo.shift();
     panel = repairPanel(next);
