@@ -64,16 +64,19 @@ export class MidiAccess {
     return typeof navigator !== 'undefined' && typeof navigator.requestMIDIAccess === 'function';
   }
 
-  async request(): Promise<MidiState> {
+  async request(sysex = false): Promise<MidiState> {
     if (!MidiAccess.supported()) return this.state;
-    if (this.access) return this.state;
+    if (this.access && (!sysex || this.access.sysexEnabled)) return this.state;
     this.state = 'pending';
     this.message = 'Asking the browser for MIDI access…';
     this.events.onPorts();
     try {
-      this.access = await navigator.requestMIDIAccess({ sysex: false });
+      const access = await navigator.requestMIDIAccess({ sysex });
+      if (this.access) this.access.onstatechange = null;
+      this.detach();
+      this.access = access;
     } catch (err) {
-      this.state = 'denied';
+      this.state = this.access ? 'ready' : 'denied';
       this.message = `MIDI access was refused (${err instanceof Error ? err.message : String(err)}). Allow MIDI for this site to use external instruments.`;
       this.events.onPorts();
       return this.state;

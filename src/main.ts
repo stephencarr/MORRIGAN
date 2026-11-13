@@ -6,6 +6,7 @@
  * Copyright (C) 2026 The CLATTER contributors. SPDX-License-Identifier: GPL-3.0-only
  */
 import './ui/style.css';
+import { installLcxl } from './ui/lcxl';
 import { installMidiLearn } from './ui/midiLearn';
 import { App } from './app/app';
 import { loadPrefs } from './app/prefs';
@@ -58,6 +59,7 @@ async function main(): Promise<void> {
 
   const { bar, status } = menubar(app, chrome);
   installMidiLearn(app, chrome);
+  installLcxl(app, chrome);
   const st = h('div', '', status);
   st.dataset.test = 'status';
   const midiSt = h('div', '', status);
@@ -111,6 +113,7 @@ async function main(): Promise<void> {
 
   const frame = () => {
     if (shown) views[shown].frame();
+    app.lcxl.frame();
     const m = app.meters;
     if (m) transport.meters(m.masterL, m.masterR, m.clipped);
     requestAnimationFrame(frame);

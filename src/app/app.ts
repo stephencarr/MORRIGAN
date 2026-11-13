@@ -31,6 +31,7 @@ import { describeStepSound, isEmptyStepSound, lockableParam, resolveStepSound, s
 import { addEvolution, clearEvolution, distributeSounds, generateVariations, mutateSounds, slotWritable } from '../sound/soundgen';
 import { voiceKeys } from '../sound/kitgen';
 import { clamp, clone, MAX_PATTERNS, VARIATION_SLOTS, MAX_STEPS, stepTicks, type StepSound, type Variation, type DestructionSettings, type GenSettings, type Hit, type Pattern, type Project, type Quantize, type Resolution, type SynthKit, type Track, type TrackMix, type TrackPlay, type TrackSound } from '../model/types';
+import { LcxlSession } from '../midi/lcxlSession';
 import { MidiLearn } from '../midi/learn';
 import { learnTargets } from '../midi/learnTargets';
 import { MidiController } from '../midi/controller';
@@ -133,6 +134,7 @@ export class App {
   readonly library: SampleLibrary;
   readonly midi: MidiController;
   readonly midiLearn: MidiLearn;
+  readonly lcxl: LcxlSession;
   readonly history: History<DocState>;
   readonly sequence: Sequence;
   readonly scheduler: Scheduler;
@@ -254,6 +256,7 @@ export class App {
     let midiStorage: Storage | undefined;
     try { midiStorage = globalThis.localStorage; } catch { /* Private browsing may block storage. */ }
     this.midiLearn = new MidiLearn(() => learnTargets(this), midiStorage, () => this.emit(['midi']), (t) => this.say(t));
+    this.lcxl = new LcxlSession(this);
     this.exporter = new ExportRunner({
       render: (kind, bars, tail, onProgress) => (kind === 'master' ? this.exportMaster(bars, tail, onProgress) : kind === 'stems' ? this.exportStems(bars, tail, onProgress) : this.exportMidiFile(bars)),
       deliver: (f) => this.deliver(f),

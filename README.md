@@ -84,3 +84,12 @@ External MIDI clock takes priority over learned tempo. Existing CLATTER note inp
 recording, clock and output retain their stock behavior. Relative encoders, notes as learn
 sources, variation overrides and channel-mode CC 120–127 are not mapped by this feature.
 Automated MIDI tests use simulated input and the real audio engine.
+
+## Launch Control XL Mk2 experiment
+
+Open **MIDI → Launch Control XL Mk2…** in CLATTER and enable the fixed sequencer profile.
+It selects Factory Template 1, maps Up/Down to track focus and Left/Right to 16-step pages,
+and makes the two button rows the selected track’s step sequencer. LEDs show hits, modifiers,
+parameter locks and the audible playhead. Mouse edits and undo update the hardware too.
+See [setup, colour legend and protocol notes](docs/LCXL_MK2.md). No individual button learning
+is needed; knobs/faders can still use MIDI learn. The custom MORRIGAN hardware comes later.

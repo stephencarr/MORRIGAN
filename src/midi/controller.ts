@@ -103,6 +103,17 @@ export class MidiController {
   readonly out: MidiOutput;
   readonly follower: TempoFollower;
   prefs: MidiPrefs;
+  private interceptors = new Set<(data: Uint8Array, device: string | null) => boolean>();
+  reservedOutputId: string | null = null;
+
+  intercept(fn: (data: Uint8Array, device: string | null) => boolean): () => void {
+    this.interceptors.add(fn); return () => this.interceptors.delete(fn);
+  }
+
+  reserveOutput(id: string | null): void {
+    this.reservedOutputId = id;
+    if (id && this.prefs.outId === id) this.selectOutput(null);
+  }
   /** recent messages for the monitor */
   log: string[] = [];
 
@@ -147,8 +158,8 @@ export class MidiController {
     return MidiAccess.supported();
   }
 
-  async enable(): Promise<MidiState> {
-    const s = await this.access.request();
+  async enable(sysex = false): Promise<MidiState> {
+    const s = await this.access.request(sysex);
     if (s === 'ready') {
       this.selectOutput(this.prefs.outId);
       this.selectInput(this.prefs.inId);
@@ -166,6 +177,7 @@ export class MidiController {
   }
 
   selectOutput(id: string | null): void {
+    if (id && id === this.reservedOutputId) { this.h.message?.('THIS OUTPUT IS RESERVED FOR THE LCXL BUTTON LEDS'); return; }
     this.prefs.outId = id;
     this.out.setSink(this.access.openOutput(id));
     this.h.changed();
@@ -178,6 +190,7 @@ export class MidiController {
   }
 
   private receive(data: Uint8Array, ts: number): void {
+    for (const fn of this.interceptors) if (fn(data, this.prefs.inId)) return;
     const s = data[0] ?? 0;
     if (s >= 0xf8 || s === 0xf2) {
       this.follower.receive(s, ts);

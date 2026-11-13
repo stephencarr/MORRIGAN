@@ -2857,3 +2857,6 @@ input.num.seedin::placeholder {
 .midi-learning [data-midi-target] { outline: 1px dashed currentColor; outline-offset: 2px; cursor: crosshair; }
 .midi-assignments { max-height: 180px; overflow: auto; }
 [data-test="midi-learn-dialog"] select { width: 100%; margin: 6px 0 12px; height: auto; white-space: normal; }
+
+.lcxl-strip { padding: 4px 10px; border-bottom: 2px solid currentColor; flex-wrap: wrap; }
+[data-test="lcxl-dialog"] select { width: 100%; margin: 6px 0 12px; height: auto; }
