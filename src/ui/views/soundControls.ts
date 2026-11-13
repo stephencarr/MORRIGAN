@@ -153,6 +153,8 @@ export function paramCtl(app: App, parent: HTMLElement, p: ParamDef, panel: Pane
   c.row.dataset.param = String(p.id);
   const lk = h('span', 'lock', c.name);
   panel.add(() => {
+    if (p.kind !== 'target' && (o.base || app.ui.slot === null)) c.row.dataset.midiTarget = `param:${p.id}`;
+    else delete c.row.dataset.midiTarget;
     if (o.labelOf) c.name.firstChild!.textContent = o.labelOf();
     const over = !o.base && app.paramOverridden(p.id);
     lk.textContent = (locked() ? '◆' : '') + (over ? '◇' : '');

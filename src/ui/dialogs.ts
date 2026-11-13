@@ -14,7 +14,7 @@ import { EXPORT_LABEL, type ExportKind } from '../app/exportJob';
 import { h, num, Panel, select } from './widgets';
 import { cpx, sz } from './scale';
 
-const SOURCE_URL = 'https://github.com/clickysteve/clatter';
+const SOURCE_URL = 'https://github.com/stephencarr/MORRIGAN';
 const LXR_URL = 'https://github.com/erica-synths/lxr-desktop-app';
 
 let open: { veil: HTMLDivElement; box: HTMLDivElement } | null = null;
@@ -60,6 +60,8 @@ export function aboutDialog(): void {
   s.innerHTML = `
 <p><b>Generative drum synthesis and rhythmic destruction.</b> A browser drum workstation from the Slop Factory:
 generate a rhythm, generate a kit, mutate both, perform.</p>
+<p>This modified CLATTER workstation is hosted in Stephen Carr’s MORRIGAN project and adds MIDI learn.
+Original CLATTER by <a href="https://github.com/clickysteve/clatter" target="_blank" rel="noopener">clickysteve / Slop Factory</a>.</p>
 <h3>SYNTHESIS</h3>
 <p>CLATTER's synthesised drums are the drum voices, envelopes, filters, modulation,
 decimation and FX bus of the <b>Erica Synths LXR-02</b>'s open-source firmware, compiled unchanged (apart

@@ -57,15 +57,15 @@ export function mixerPane(app: App, pane: HTMLElement): PaneParts {
         nm.textContent = x().name;
       });
       const fr = h('div', 'row stripfader', s);
-      vfader(mx, fr, { get: () => x().mix.volume, set: (v) => app.setTrackMix(tr.id, { volume: v }, 'VOLUME'), begin: () => app.beginDrag('VOLUME'), end: () => app.endDrag(), height: 84, def: 0.8, title: 'Level (0.8 = 0 dB, double-click)' });
+      vfader(mx, fr, { get: () => x().mix.volume, set: (v) => app.setTrackMix(tr.id, { volume: v }, 'VOLUME'), begin: () => app.beginDrag('VOLUME'), end: () => app.endDrag(), height: 84, def: 0.8, title: 'Level (0.8 = 0 dB, double-click)' }).dataset.midiTarget = `track:${tr.id}:volume`;
       const met = h('div', 'meter', fr);
       met.style.width = cpx(10);
       trackMeters.push(h('div', 'lvl', met));
       const dbl = h('div', 'hint', s);
       mx.add(() => (dbl.textContent = dbText(x().mix.volume) + ' DB'));
-      range(mx, s, { get: () => Math.round(x().mix.pan * 100), set: (v) => app.setTrackMix(tr.id, { pan: v / 100 }, 'PAN'), min: -100, max: 100, def: 0, bip: true, format: (v) => (v === 0 ? 'C' : v < 0 ? 'L' + -v : 'R' + v), begin: () => app.beginDrag('PAN'), end: () => app.endDrag(), title: 'Pan' });
-      range(mx, s, { get: () => Math.round(x().mix.filter * 100), set: (v) => app.setTrackMix(tr.id, { filter: v / 100 }, 'FILTER'), min: -100, max: 100, def: 0, bip: true, format: (v) => (v === 0 ? 'FLT' : v < 0 ? 'LP' : 'HP'), begin: () => app.beginDrag('FILTER'), end: () => app.endDrag(), title: 'One-knob filter: left low-pass, right high-pass' });
-      range(mx, s, { get: () => Math.round((x().mix.send ?? 0) * 100), set: (v) => app.setTrackMix(tr.id, { send: v / 100 }, 'SEND'), min: 0, max: 100, def: 0, format: (v) => 'FX ' + v, begin: () => app.beginDrag('SEND'), end: () => app.endDrag(), title: 'Send to the LXR FX bus (the dry sound also plays)' });
+      range(mx, s, { get: () => Math.round(x().mix.pan * 100), set: (v) => app.setTrackMix(tr.id, { pan: v / 100 }, 'PAN'), min: -100, max: 100, def: 0, bip: true, format: (v) => (v === 0 ? 'C' : v < 0 ? 'L' + -v : 'R' + v), begin: () => app.beginDrag('PAN'), end: () => app.endDrag(), title: 'Pan' }).dataset.midiTarget = `track:${tr.id}:pan`;
+      range(mx, s, { get: () => Math.round(x().mix.filter * 100), set: (v) => app.setTrackMix(tr.id, { filter: v / 100 }, 'FILTER'), min: -100, max: 100, def: 0, bip: true, format: (v) => (v === 0 ? 'FLT' : v < 0 ? 'LP' : 'HP'), begin: () => app.beginDrag('FILTER'), end: () => app.endDrag(), title: 'One-knob filter: left low-pass, right high-pass' }).dataset.midiTarget = `track:${tr.id}:filter`;
+      range(mx, s, { get: () => Math.round((x().mix.send ?? 0) * 100), set: (v) => app.setTrackMix(tr.id, { send: v / 100 }, 'SEND'), min: 0, max: 100, def: 0, format: (v) => 'FX ' + v, begin: () => app.beginDrag('SEND'), end: () => app.endDrag(), title: 'Send to the LXR FX bus (the dry sound also plays)' }).dataset.midiTarget = `track:${tr.id}:send`;
       const ms = h('div', 'row stripbtns', s);
       button(mx, ms, 'M', () => app.setTrackMix(tr.id, { mute: !x().mix.mute }), { cls: 'small', on: () => x().mix.mute, title: 'Mute' });
       button(mx, ms, 'S', () => app.setTrackMix(tr.id, { solo: !x().mix.solo }), { cls: 'small', on: () => x().mix.solo, title: 'Solo' });
@@ -76,7 +76,7 @@ export function mixerPane(app: App, pane: HTMLElement): PaneParts {
     s.dataset.channel = 'master';
     h('div', 'sname inv', s, 'MASTER');
     const fr = h('div', 'row stripfader', s);
-    vfader(mx, fr, { get: () => app.project.master.volume, set: (v) => app.setMaster({ volume: v }, 'MASTER VOLUME'), begin: () => app.beginDrag('MASTER VOLUME'), end: () => app.endDrag(), height: 84, def: 0.8, title: 'Master gain' });
+    vfader(mx, fr, { get: () => app.project.master.volume, set: (v) => app.setMaster({ volume: v }, 'MASTER VOLUME'), begin: () => app.beginDrag('MASTER VOLUME'), end: () => app.endDrag(), height: 84, def: 0.8, title: 'Master gain' }).dataset.midiTarget = 'master:volume';
     const mL = h('div', 'meter', fr);
     const mR = h('div', 'meter', fr);
     for (const m of [mL, mR]) m.style.width = cpx(10);
@@ -264,7 +264,7 @@ export function fxPane(app: App, pane: HTMLElement): PaneParts {
         nm.classList.toggle('inv', app.ui.track === tr.id);
       });
       button(fp, r, 'FX ONLY', () => app.setTrackMix(tr.id, { route: x().mix.route === 'fx' ? 'main' : 'fx' }, 'ROUTE'), { cls: 'small', on: () => x().mix.route === 'fx', title: 'Play this track only through the FX bus (no dry sound)' });
-      range(fp, r, { get: () => Math.round((x().mix.send ?? 0) * 100), set: (v) => app.setTrackMix(tr.id, { send: v / 100 }, 'SEND'), min: 0, max: 100, def: 0, format: (v) => 'SEND ' + v, begin: () => app.beginDrag('SEND'), end: () => app.endDrag(), title: 'Send level (the dry sound also plays)', width: 150 });
+      range(fp, r, { get: () => Math.round((x().mix.send ?? 0) * 100), set: (v) => app.setTrackMix(tr.id, { send: v / 100 }, 'SEND'), min: 0, max: 100, def: 0, format: (v) => 'SEND ' + v, begin: () => app.beginDrag('SEND'), end: () => app.endDrag(), title: 'Send level (the dry sound also plays)', width: 150 }).dataset.midiTarget = `track:${tr.id}:send`;
     }
   };
   build();

@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2026 The CLATTER contributors. SPDX-License-Identifier: GPL-3.0-only
  */
+import { midiLearnDialog } from './midiLearn';
 import type { App } from '../app/app';
 import { PRESETS } from '../model/presets';
 import { exportKitDialog } from './kitExportDialog';
@@ -122,6 +123,7 @@ export function menubar(app: App, screen: HTMLElement): { bar: HTMLElement; stat
         const flag = (label: string, k: 'notesOut' | 'clockOut' | 'clockIn' | 'notesIn') => ({ label, action: () => ((m.prefs[k] = !m.prefs[k]), app.emit(['midi'])), checked: () => m.prefs[k] });
         list.push('sep', flag('Send notes', 'notesOut'), flag('Send clock and start/stop', 'clockOut'), flag('Follow incoming clock', 'clockIn'), flag('Play tracks from incoming notes', 'notesIn'));
         list.push({ label: 'Record incoming notes into the pattern', action: () => ((app.ui.record = !app.ui.record), app.emit(['midi'])), checked: () => app.ui.record });
+        list.push('sep', { label: 'MIDI learn…', action: () => midiLearnDialog(app) });
         list.push('sep', { label: 'Panic: all notes off', action: () => app.panic() });
         return list;
       },

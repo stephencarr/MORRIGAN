@@ -6,6 +6,7 @@
  * Copyright (C) 2026 The CLATTER contributors. SPDX-License-Identifier: GPL-3.0-only
  */
 import './ui/style.css';
+import { installMidiLearn } from './ui/midiLearn';
 import { App } from './app/app';
 import { loadPrefs } from './app/prefs';
 import { closeMenus, menubar } from './ui/menu';
@@ -56,6 +57,7 @@ async function main(): Promise<void> {
   loading.el.remove();
 
   const { bar, status } = menubar(app, chrome);
+  installMidiLearn(app, chrome);
   const st = h('div', '', status);
   st.dataset.test = 'status';
   const midiSt = h('div', '', status);

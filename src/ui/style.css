@@ -2851,3 +2851,9 @@ input.num.seedin::placeholder {
   white-space: nowrap;
   margin-right: calc(6 * var(--px));
 }
+
+/* MIDI learn only adds emphasis while picking a destination. */
+.midi-learn-strip { padding: 6px 10px; border-bottom: 2px solid currentColor; }
+.midi-learning [data-midi-target] { outline: 1px dashed currentColor; outline-offset: 2px; cursor: crosshair; }
+.midi-assignments { max-height: 180px; overflow: auto; }
+[data-test="midi-learn-dialog"] select { width: 100%; margin: 6px 0 12px; height: auto; white-space: normal; }

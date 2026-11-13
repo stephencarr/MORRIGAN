@@ -40,7 +40,9 @@ Erica Synths, is not licensed under the GPL and is not part of CLATTER.
 
 The complete corresponding source for the CLATTER web application, including the LXR firmware
 files, CLATTER's modifications, the WebAssembly build script and every other script used to
-build it, is at <https://github.com/clickysteve/clatter>. The application's About box shows the
+build it, is at <https://github.com/stephencarr/MORRIGAN>.
+This modified distribution adds the MORRIGAN interface and MIDI learn in the CLATTER workstation.
+Original CLATTER by clickysteve / Slop Factory is at <https://github.com/clickysteve/clatter>. The application's About box shows the
 commit it was built from. `npm ci && npm run build` builds the site; `node
 scripts/build-lxr.mjs` rebuilds the WebAssembly engine (clang and wasm-ld).
 

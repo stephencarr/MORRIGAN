@@ -11,6 +11,7 @@
  *
  * Copyright (C) 2026 The CLATTER contributors. SPDX-License-Identifier: GPL-3.0-only
  */
+import type { ControlChange } from './learn';
 import type { ClockFollower } from '@slopfactory/core/midi';
 import { CLOCK, CONTINUE, START, STOP } from './messages';
 import { MidiOutput } from './output';
@@ -88,6 +89,7 @@ export interface MidiPrefs {
 export const defaultMidiPrefs = (): MidiPrefs => ({ outId: null, inId: null, notesOut: true, clockOut: false, clockIn: false, notesIn: true, inChannel: 0 });
 
 export interface MidiHandlers {
+  cc?(message: ControlChange): void;
   /** a note arrived: (channel 1-16, note, velocity) */
   note(channel: number, note: number, vel: number): void;
   tempo(bpm: number): void;
@@ -184,6 +186,10 @@ export class MidiController {
     const type = s & 0xf0;
     const ch = (s & 0x0f) + 1;
     if (this.prefs.inChannel && ch !== this.prefs.inChannel) return;
+    if (data.length < 3 || data[1]! > 127 || data[2]! > 127) return;
+    if (type === 0xb0 && data[1]! < 120 && this.prefs.inId) {
+      this.h.cc?.({ device: this.prefs.inId, channel: ch, cc: data[1]!, value: data[2]! });
+    }
     if (type === 0x90 && (data[2] ?? 0) > 0) {
       this.pushLog(`IN  CH${ch} NOTE ${data[1]} VEL ${data[2]}`);
       if (this.prefs.notesIn) this.h.note(ch, data[1] ?? 0, data[2] ?? 0);

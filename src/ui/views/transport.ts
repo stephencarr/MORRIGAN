@@ -22,6 +22,7 @@ export function transportWindow(app: App, chrome: HTMLElement, menubar: HTMLElem
   button(panel, play, '■ STOP', () => app.stop(), { title: 'Stop (space, esc)' }).dataset.test = 'stop';
   h('div', 'lbl', play, 'BPM');
   num(panel, play, { get: () => app.project.tempo, set: (v) => app.setTempo(v), min: 30, max: 300, step: 1, title: 'Tempo (drag, or click and type)' }).dataset.test = 'bpm';
+  play.querySelector<HTMLElement>('[data-test=bpm]')!.dataset.midiTarget = 'tempo';
   const curve = button(panel, play, 'CURVE', () => app.toggleTempoAuto(), { on: () => !!app.project.tempoAuto?.on, title: 'The tempo curve (WILDCARD tab): on plays the BPM scaled by the curve, off holds the BPM' });
   curve.dataset.test = 'tempo-curve-toggle';
   panel.add(() => (curve.style.display = app.project.tempoAuto ? '' : 'none'));

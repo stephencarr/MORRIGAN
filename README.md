@@ -57,6 +57,30 @@ Open **MIDI input** near the transport and click **Enable MIDI**, allowing the b
 
 Default mapping uses MIDI note numbers: Drum 1 **36**, Drum 2 **45**, Drum 3 **50**, Snare **38**, Cymbal **49**, Closed hat **42**, Open hat **46**. Configure your controller's pads to those numbers. Velocity is preserved; open and closed hats share the same voice. Unmapped notes, note-offs, and CC messages are ignored. Select All channels or a particular input channel.
 
-**Follow MIDI clock / Start / Stop** is optional and off initially. It follows incoming tempo and transport using CLATTER's existing tempo follower, not phase-locked synchronization. Playing MIDI notes auditions the voices; it does not record into the sequence. Controller-knob/CC assignments and MIDI learn are not implemented. No MIDI output is opened, preventing MIDI-thru feedback.
+**Follow MIDI clock / Start / Stop** is optional and off initially. It follows incoming tempo and transport using CLATTER's existing tempo follower, not phase-locked synchronization. Playing MIDI notes auditions the voices; it does not record into the sequence. Controller-knob/CC assignments are not implemented in the MORRIGAN instrument interface; the CLATTER workstation supports MIDI learn as described below. No MIDI output is opened, preventing MIDI-thru feedback.
 
 The device is automatically reattached after unplug/replug. MIDI permission refusal or an unsupported browser leaves the internal instrument playable. Connection choices are temporary for the current page session. Automated tests simulate MIDI devices and feed the real audio engine; physical hardware compatibility must be checked with your controller.
+
+## CLATTER with MIDI learn
+
+[Open CLATTER](https://stephencarr.github.io/MORRIGAN/clatter.html) from the **CLATTER workspace**
+link in MORRIGAN’s footer, or use that URL directly. Both interfaces are built, tested and
+hosted from this repository. There is no separate CLATTER repository or site dependency.
+
+1. In Chrome or Edge, connect your controller and open **MIDI → MIDI learn…**.
+2. Enable MIDI, allow browser access and select your MIDI input.
+3. Choose a control from the list and press **LEARN CONTROL**, or press **CHOOSE ON SCREEN**
+   and click an outlined control. In the synth editor, select **BASE** first.
+4. Move an absolute CC knob or fader. The first message saves the assignment without changing
+   the sound; subsequent messages control it. **Escape** cancels learning.
+5. Open the same dialog to remove individual assignments or clear them all.
+
+Available: base synthesis and LXR FX parameters, track volume/pan/filter/FX send, master
+volume and tempo. Parameters keep their stock ranges. Assignments bind to device, channel
+and control, survive reloads in the same browser and stay separate from project files.
+Enable MIDI each browser session. Switching tracks does not redirect a mapping;
+removed tracks leave their assignments inactive. Relearning replaces conflicting mappings.
+External MIDI clock takes priority over learned tempo. Existing CLATTER note input,
+recording, clock and output retain their stock behavior. Relative encoders, notes as learn
+sources, variation overrides and channel-mode CC 120–127 are not mapped by this feature.
+Automated MIDI tests use simulated input and the real audio engine.
