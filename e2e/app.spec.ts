@@ -520,7 +520,7 @@ test('SOUND tabs keep their state; the tab is remembered; the sidebar selects a 
   expect(await page.evaluate(() => (window as unknown as W).clatter.ui.slot)).toBe(1);
   const before = await page.evaluate(() => (window as unknown as W).clatter.track.id);
   const second = await page.evaluate(() => (window as unknown as W).clatter.project.tracks[1]!.id);
-  await page.click(`.sidetrack[data-track="${second}"]`);
+  await page.click(`.sidetrack[data-track="${second}"] .sname`);
   expect(await page.evaluate(() => (window as unknown as W).clatter.ui.track)).toBe(second);
   // a variation is edited, then the tabs are switched: nothing is lost
   await page.evaluate(() => (window as unknown as W).clatter.createVariation((window as unknown as W).clatter.track.id, 1));
