@@ -88,10 +88,10 @@ export function soundView(app: App, screen: HTMLElement): View {
       const stop = (e: Event) => e.stopPropagation();
       ms.addEventListener('click', stop);
       ms.addEventListener('dblclick', stop);
-      const hear = button(lp, ms, '▶︎', () => void app.audition(tr.id), { cls: 'small', title: 'Audition this track through its current mixer and FX routing' });
-      hear.dataset.test = 'sound-track-audition';
       button(lp, ms, 'M', () => app.setTrackMix(tr.id, { mute: !x().mix.mute }), { cls: 'small', on: () => x().mix.mute, title: 'Mute' });
       button(lp, ms, 'S', () => app.setTrackMix(tr.id, { solo: !x().mix.solo }), { cls: 'small', on: () => x().mix.solo, title: 'Solo' });
+      const hear = button(lp, ms, '▶︎', () => void app.audition(tr.id), { cls: 'small', title: 'Audition this track through its current mixer and FX routing' });
+      hear.dataset.test = 'sound-track-audition';
       const met = h('div', 'meter h sidemeter', li);
       sideMeters.push(h('div', 'lvl', met));
       lp.add(() => {
