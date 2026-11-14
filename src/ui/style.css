@@ -142,7 +142,7 @@ svg {
   padding: 0 calc(16 * var(--px));
   display: flex;
   align-items: center;
-  cursor: default;
+  cursor: pointer;
   letter-spacing: 0.5px;
 }
 #menubar .menu.logo {
@@ -205,6 +205,7 @@ svg {
   color: var(--paper);
 }
 .dropdown .item.disabled {
+  cursor: default;
   color: var(--dim);
   opacity: 0.5;
 }
@@ -267,7 +268,7 @@ svg {
   background: var(--paper);
   color: var(--ink);
   letter-spacing: 1px;
-  cursor: default;
+  cursor: pointer;
   white-space: nowrap;
 }
 #viewtabs .tab:hover:not(.on) {
@@ -373,7 +374,7 @@ svg {
   padding: var(--pad);
 }
 .win.collapsible > .titlebar {
-  cursor: default;
+  cursor: pointer;
 }
 .win.collapsible > .titlebar .title::before {
   content: '▾';
@@ -477,7 +478,7 @@ svg {
   align-items: center;
   gap: calc(8 * var(--px));
   min-height: calc(34 * var(--px));
-  cursor: default;
+  cursor: pointer;
   letter-spacing: 1px;
 }
 .more > .more-head::before {
@@ -501,6 +502,13 @@ svg {
 }
 
 /* ------------------------------------------------------------ controls */
+button:not(:disabled),
+select:not(:disabled),
+[role='button']:not([aria-disabled='true']),
+.msel-item {
+  cursor: pointer;
+}
+
 .btn {
   border: var(--u) solid var(--ink);
   background: var(--paper);
@@ -514,7 +522,7 @@ svg {
   align-items: center;
   justify-content: center;
   white-space: nowrap;
-  cursor: default;
+  cursor: pointer;
   border-radius: 0;
   flex: none;
   letter-spacing: 0.5px;
@@ -539,7 +547,7 @@ svg {
   box-shadow: inset 0 0 0 var(--u) var(--ink);
 }
 .btn.on,
-.btn:active,
+.btn:active:not(:disabled),
 .btn.pressed {
   background: var(--ink);
   color: var(--paper);
@@ -554,6 +562,7 @@ svg {
 }
 .btn:disabled {
   opacity: 0.35;
+  cursor: default;
 }
 .btn:focus-visible {
   outline: var(--u) dotted var(--ink);
@@ -691,7 +700,7 @@ input.num {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  cursor: default;
+  cursor: pointer;
   outline: none;
   min-width: calc(96 * var(--px));
   flex: none;
@@ -904,7 +913,7 @@ input.mtext:focus {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  cursor: default;
+  cursor: pointer;
   line-height: var(--row-h);
 }
 .trackrow .tname:hover {
@@ -1074,7 +1083,7 @@ input.mtext:focus {
   min-height: calc(84 * var(--px));
   font-size: var(--fs-lg);
   letter-spacing: 1px;
-  cursor: default;
+  cursor: pointer;
   text-align: center;
   line-height: 1.1;
   box-shadow: calc(4 * var(--px)) calc(4 * var(--px)) 0 var(--ink);
@@ -1136,7 +1145,7 @@ input.mtext:focus {
   align-items: center;
   justify-content: center;
   border-right: var(--u) solid var(--ink);
-  cursor: default;
+  cursor: pointer;
 }
 .xtab .xon::after {
   content: '';
@@ -1158,7 +1167,7 @@ input.mtext:focus {
   flex-direction: column;
   justify-content: center;
   padding: 0 calc(12 * var(--px));
-  cursor: default;
+  cursor: pointer;
   min-width: 0;
   letter-spacing: 1px;
 }
@@ -1404,19 +1413,23 @@ input.mtext:focus {
   padding: 0 calc(22 * var(--px));
   height: calc(38 * var(--px));
   letter-spacing: 1px;
-  cursor: default;
+  cursor: pointer;
   line-height: 1;
 }
-.mbutton:hover {
+.mbutton:hover:not(:disabled) {
   box-shadow: inset 0 0 0 var(--u) var(--ink);
+}
+.mbutton:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 .mbutton.default {
   box-shadow: 0 0 0 var(--u) var(--paper), 0 0 0 calc(var(--u) * 2) var(--ink);
 }
-.mbutton.default:hover {
+.mbutton.default:hover:not(:disabled) {
   box-shadow: 0 0 0 var(--u) var(--paper), 0 0 0 calc(var(--u) * 2) var(--ink), inset 0 0 0 var(--u) var(--ink);
 }
-.mbutton:active {
+.mbutton:active:not(:disabled) {
   background: var(--ink);
   color: var(--paper);
 }
@@ -1576,7 +1589,7 @@ html[data-view='sound'] #main {
   gap: calc(2 * var(--px));
   padding: calc(4 * var(--px)) calc(6 * var(--px));
   border: var(--u) solid var(--ink);
-  cursor: default;
+  cursor: pointer;
 }
 .sidetrack:hover:not(.on) {
   box-shadow: inset 0 0 0 var(--u) var(--ink);
@@ -1781,7 +1794,7 @@ html[data-view='pattern'] #main {
   background: var(--paper);
   color: var(--ink);
   letter-spacing: 1px;
-  cursor: default;
+  cursor: pointer;
   position: relative;
   top: var(--u);
   z-index: 1;
@@ -2300,7 +2313,7 @@ html[data-view='pattern'] #main {
   white-space: nowrap;
 }
 .varrow {
-  cursor: default;
+  cursor: pointer;
 }
 .varrow:hover:not(.on) {
   box-shadow: inset 0 0 0 var(--u) var(--ink);
@@ -2481,7 +2494,7 @@ html[data-view='pattern'] #main {
 .sendrow .sname {
   min-width: calc(80 * var(--px));
   padding: calc(2 * var(--px)) calc(6 * var(--px));
-  cursor: default;
+  cursor: pointer;
 }
 .sendrow .sname.inv {
   background: var(--ink);
@@ -2508,7 +2521,7 @@ html[data-view='pattern'] #main {
   flex-direction: column;
   gap: calc(3 * var(--px));
   min-width: 0;
-  cursor: default;
+  cursor: pointer;
 }
 .dslot.empty {
   border-style: dotted;

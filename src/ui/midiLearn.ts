@@ -34,6 +34,10 @@ export function midiLearnDialog(app: App): void {
   learn.addEventListener('click', () => { if (ready()) { closeDialog(); app.midiLearn.start(target.value); } });
   h('h3', '', box, 'ASSIGNMENTS');
   const assignments = h('div', 'midi-assignments', box);
+  const [clear] = buttons(box, [
+    ['CLEAR ALL', () => confirmDialog('CLEAR MIDI ASSIGNMENTS', 'Remove all saved MIDI learn assignments?', 'CLEAR', () => { app.midiLearn.clear(); midiLearnDialog(app); })],
+    ['DONE', closeDialog, true],
+  ]);
   const refresh = () => {
     if (!box.isConnected) { refreshDialogs.delete(app); return; }
     const m = app.midi;
@@ -48,6 +52,7 @@ export function midiLearnDialog(app: App): void {
     }
     input.value = m.prefs.inId ?? '';
     pick.disabled = learn.disabled = !ready();
+    clear!.disabled = app.midiLearn.bindings.length === 0;
     assignments.replaceChildren();
     const targets = app.midiLearn.catalog();
     if (!app.midiLearn.bindings.length) h('p', 'hint', assignments, 'NO ASSIGNMENTS YET');
@@ -62,10 +67,6 @@ export function midiLearnDialog(app: App): void {
   };
   refreshDialogs.set(app, refresh);
   refresh();
-  buttons(box, [
-    ['CLEAR ALL', () => confirmDialog('CLEAR MIDI ASSIGNMENTS', 'Remove all saved MIDI learn assignments?', 'CLEAR', () => { app.midiLearn.clear(); midiLearnDialog(app); })],
-    ['DONE', closeDialog, true],
-  ]);
 }
 
 export function installMidiLearn(app: App, chrome: HTMLElement): void {

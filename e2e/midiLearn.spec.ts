@@ -18,7 +18,16 @@ async function openLearn(page: Page) {
 async function enable(page: Page) {
   await openLearn(page);
   await page.getByRole('button', { name: 'ENABLE MIDI', exact: true }).click();
+  const pick = page.getByRole('button', { name: 'CHOOSE ON SCREEN', exact: true });
+  await expect(pick).toBeDisabled();
+  await expect(pick).toHaveCSS('opacity', '0.35');
+  await expect(pick).toHaveCSS('cursor', 'default');
+  await expect(page.getByRole('button', { name: 'LEARN CONTROL', exact: true })).toBeDisabled();
+  await expect(page.getByRole('button', { name: 'CLEAR ALL', exact: true })).toBeDisabled();
   await page.getByLabel('MIDI input', { exact: true }).selectOption('test-controller');
+  await expect(pick).toBeEnabled();
+  await expect(pick).toHaveCSS('opacity', '1');
+  await expect(pick).toHaveCSS('cursor', 'pointer');
 }
 const cc = (page: Page, value: number, number = 74, channel = 0) => page.evaluate(({ value, number, channel }) => (window as unknown as W).sendMidi([0xb0 + channel, number, value]), { value, number, channel });
 
@@ -39,9 +48,11 @@ test('learns from the stock UI, preserves capture value, persists, removes, and 
   await openLearn(page); await page.getByRole('button', { name: 'ENABLE MIDI', exact: true }).click();
   await expect(page.getByLabel('MIDI input', { exact: true })).toHaveValue('test-controller');
   await expect(page.locator('.midi-assignments')).toContainText('CH1 CC74');
+  await expect(page.getByRole('button', { name: 'CLEAR ALL', exact: true })).toBeEnabled();
   await cc(page, 20);
   expect(await page.evaluate(() => (window as unknown as W).clatter.project.tempo)).toBe(73);
   await page.getByRole('button', { name: 'Remove tempo', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'CLEAR ALL', exact: true })).toBeDisabled();
   await cc(page, 127); expect(await page.evaluate(() => (window as unknown as W).clatter.project.tempo)).toBe(73);
   await page.getByRole('button', { name: 'DONE', exact: true }).click();
   await page.locator('[data-test=play]').click();

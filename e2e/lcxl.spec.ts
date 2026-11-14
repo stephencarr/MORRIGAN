@@ -36,6 +36,27 @@ async function enable(page: Page) {
 const send = (page: Page, bytes: number[]) => page.evaluate((b) => (window as unknown as W).lcxlTest.send(b), bytes);
 const led = (page: Page, index: number) => page.evaluate((i) => (window as unknown as W).lcxlTest.leds[i], index);
 
+test('chooses a MIDI learn control on screen while the Mk2 sequencer is playing', async ({ page }) => {
+  await boot(page); await enable(page);
+  await page.locator('[data-test=play]').click();
+  await page.getByRole('menuitem', { name: 'MIDI', exact: true }).click();
+  await page.getByText('MIDI learn…', { exact: true }).click();
+  await expect(page.getByRole('dialog')).toContainText('INPUT CONNECTED');
+  await page.getByRole('button', { name: 'CHOOSE ON SCREEN', exact: true }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.locator('[data-test=bpm]').click();
+  await expect(page.locator('[data-test=midi-learn-strip]')).toContainText('MOVE A MIDI KNOB → TEMPO');
+  const original = await page.evaluate(() => (window as unknown as W).clatter.project.tempo);
+  await send(page, [0xb8, 13, 0]);
+  expect(await page.evaluate(() => (window as unknown as W).clatter.project.tempo)).toBe(original);
+  await send(page, [0xb8, 13, 64]);
+  expect(await page.evaluate(() => (window as unknown as W).clatter.project.tempo)).toBe(166);
+  await expect(page.locator('[data-test=midi-learn-strip]')).toBeHidden();
+  await send(page, [0xb8, 105, 127]); await send(page, [0xb8, 105, 0]);
+  expect(await page.evaluate(() => (window as unknown as W).clatter.trackIndexOf((window as unknown as W).clatter.ui.track))).toBe(1);
+  await page.locator('[data-test=stop]').click();
+});
+
 test('fixed factory profile navigates focus and edits steps with LED feedback, mouse sync and undo', async ({ page }) => {
   const errors: string[] = []; page.on('pageerror', (e) => errors.push(e.message));
   await boot(page); await enable(page);

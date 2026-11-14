@@ -45,13 +45,14 @@ export function dialog(title: string, w: number): HTMLDivElement {
   return box;
 }
 
-export function buttons(box: HTMLElement, list: [string, () => void, boolean?][]): void {
+export function buttons(box: HTMLElement, list: [string, () => void, boolean?][]): HTMLButtonElement[] {
   const row = h('div', 'btnrow', box);
-  for (const [label, fn, def] of list) {
+  return list.map(([label, fn, def]) => {
     const b = h('button', 'mbutton' + (def ? ' default' : ''), row, label);
     b.addEventListener('click', fn);
     if (def) setTimeout(() => b.focus({ preventScroll: true }));
-  }
+    return b;
+  });
 }
 
 export function aboutDialog(): void {
