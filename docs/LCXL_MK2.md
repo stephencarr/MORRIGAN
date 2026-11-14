@@ -25,18 +25,32 @@ active so they use the same Factory 1 messages.
 | Upper eight channel buttons | Toggle steps 1–8 on the displayed page |
 | Lower eight channel buttons | Toggle steps 9–16 on the displayed page |
 | Knobs and faders | Available to the existing MIDI CC learn feature |
-| Device / Mute / Solo / Record Arm | Reserved; no sequencer action in this experiment |
+| Device / Mute / Solo / Record Arm | Available to MIDI button learn; unassigned presses do not trigger drums |
 
 The mouse can still select tracks and edit the pattern. The controller follows those changes,
 including undo, pattern replacement and parameter locks. Track assignments remain flexible;
 the profile works with the project's actual track count. This does not change the workstation's
 ten-track defaults.
 
-**FOLLOW** starts enabled: the displayed page follows the audible playhead. Manual page
-selection turns following off so the bank stays where you chose to edit. Click FOLLOW to
-resume it. All navigation and setup controls are also clickable in the LCXL bar. Buttons beyond
+**FOLLOW** starts off: playback never moves you away from the page you chose to edit.
+The playhead lights only when it crosses that page. Click FOLLOW if you explicitly want
+automatic page changes; manual page selection turns it off again.
+All navigation and setup controls are also clickable in the LCXL bar. Buttons beyond
 the end of a short/partial page are off and do nothing. Button releases and repeated held
 messages do not toggle additional steps.
+
+## Learning controls without performing them
+
+Open **MIDI → MIDI learn…**, select the input, then **CHOOSE ON SCREEN**. Hover an outlined
+control to see its name; click to select it. The selected control keeps a double outline while
+waiting for MIDI. Selection does not change its value or trigger playback.
+
+The on-screen Play button toggles playback and changes to Stop while playing. Select it to
+learn **TRANSPORT · PLAY/STOP TOGGLE**. The dropdown also offers separate **PLAY** and **STOP**
+actions. Press a Note or momentary CC button to assign an action, release, then press again to
+use it. The assignment press does not perform the action, and releases or repeated held messages
+do not retrigger it. Knobs/faders still use absolute CC messages; existing assignments are retained.
+The 16 sequence buttons and navigation arrows remain reserved for the fixed LCXL profile.
 
 | LED | Meaning |
 | --- | --- |

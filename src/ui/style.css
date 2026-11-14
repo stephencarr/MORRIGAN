@@ -2868,6 +2868,10 @@ input.num.seedin::placeholder {
 /* MIDI learn only adds emphasis while picking a destination. */
 .midi-learn-strip { background: var(--paper); color: var(--ink); padding: 6px 10px; border-bottom: 2px solid currentColor; }
 .midi-learning [data-midi-target] { outline: 1px dashed currentColor; outline-offset: 2px; cursor: crosshair; }
+.midi-learning [data-midi-target]:hover,
+.midi-learning [data-midi-target]:focus-within { outline: 2px solid var(--selection); outline-offset: 3px; }
+.midi-learning [data-midi-target][data-midi-selected] { outline: 4px double var(--selection); outline-offset: 3px; }
+.midi-learning [data-midi-target] * { cursor: crosshair; }
 .midi-assignments { max-height: 180px; overflow: auto; }
 [data-test="midi-learn-dialog"] select { width: 100%; margin: 6px 0 12px; height: auto; white-space: normal; }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { LEARN_KEY, MidiLearn, type LearnTarget } from '../src/midi/learn';
+import { LEARN_KEY, MidiLearn, type LearnTarget, type NoteControl } from '../src/midi/learn';
 import { MidiController, defaultMidiPrefs } from '../src/midi/controller';
 
 function fixture(saved = '') {
@@ -56,6 +56,51 @@ describe('MIDI learn', () => {
     f.learn.start('a'); f.cc(0); f.cc(20);
     expect(f.values.a).toBe(20); expect(f.say).toHaveBeenLastCalledWith(expect.stringContaining('COULD NOT BE SAVED'));
   });
+  it('learns note buttons without acting on capture, repeats or either kind of release, and restores them', () => {
+    const f = fixture(), trigger = vi.fn();
+    f.targets.push({ id: 'toggle', label: 'PLAY/STOP', trigger });
+    const note = (value: number, extra = {}) => f.learn.receiveNote({ device: 'buttons', channel: 9, note: 105, value, ...extra });
+    f.learn.start('toggle');
+    note(0); expect(f.learn.active).toBe(true);
+    note(127); note(127); note(0); expect(trigger).not.toHaveBeenCalled();
+    note(127); note(127); note(0); expect(trigger).toHaveBeenCalledOnce();
+    note(127, { channel: 1 }); note(127, { device: 'other' }); expect(trigger).toHaveBeenCalledOnce();
+    const restored = fixture(f.storage.getItem()); restored.targets.push({ id: 'toggle', label: 'PLAY/STOP', trigger });
+    expect(restored.learn.receiveNote({ device: 'buttons', channel: 9, note: 105, value: 100 })).toBe(true);
+    expect(trigger).toHaveBeenCalledTimes(2);
+    restored.learn.release(); restored.learn.receiveNote({ device: 'buttons', channel: 9, note: 105, value: 100 });
+    expect(trigger).toHaveBeenCalledTimes(3);
+    f.learn.remove('toggle'); expect(note(127)).toBe(false);
+  });
+  it('learns momentary CC actions on a press and only triggers on subsequent rising edges', () => {
+    const f = fixture(), trigger = vi.fn();
+    f.targets.push({ id: 'toggle', label: 'PLAY/STOP', trigger });
+    f.learn.start('toggle'); f.cc(0); expect(f.learn.active).toBe(true);
+    f.cc(127); f.cc(127); f.cc(0); expect(trigger).not.toHaveBeenCalled();
+    f.cc(127); f.cc(64); f.cc(0); expect(trigger).toHaveBeenCalledOnce();
+    f.cc(1); expect(trigger).toHaveBeenCalledTimes(2);
+    // A CC and a note with the same number are different sources.
+    expect(f.learn.receiveNote({ device: 'knobs', channel: 1, note: 74, value: 127 })).toBe(false);
+  });
+  it('suppresses notes while choosing, rejects note-to-slider assignments and preserves CC compatibility', () => {
+    const f = fixture(); const note = () => f.learn.receiveNote({ device: 'x', channel: 1, note: 36, value: 100 });
+    f.learn.start(); expect(note()).toBe(true); expect(f.learn.bindings).toEqual([]);
+    f.learn.start('a'); expect(note()).toBe(true); expect(f.learn.pending).toBe('a');
+    f.cc(0); f.cc(127); expect(f.values.a).toBe(127);
+    expect(f.learn.bindings[0]).toEqual({ device: 'knobs', channel: 1, cc: 74, target: 'a' });
+    expect(note()).toBe(false);
+  });
+});
+
+it('offers note on and both release formats to button learn before drum input, even with notes disabled', () => {
+  const noteControl = vi.fn((_message: NoteControl) => true), note = vi.fn(), resetControls = vi.fn();
+  const m = new MidiController({ noteControl, note, resetControls, changed() {}, tempo() {}, transport() {} }, { ...defaultMidiPrefs(), inId: 'buttons', notesIn: false });
+  const receive = (bytes: number[]) => (m as unknown as { receive(d: Uint8Array, t: number): void }).receive(new Uint8Array(bytes), 0);
+  receive([0x98, 105, 100]); receive([0x88, 105, 64]); receive([0x98, 105, 0]);
+  expect(noteControl.mock.calls.map(([m]) => m.value)).toEqual([100, 0, 0]);
+  m.prefs.notesIn = true; receive([0x98, 105, 100]); expect(note).not.toHaveBeenCalled();
+  noteControl.mockReturnValue(false); receive([0x98, 36, 100]); expect(note).toHaveBeenCalledOnce();
+  m.selectInput(null); expect(resetControls).toHaveBeenCalledOnce();
 });
 
 it('routes CC independently of notes while preserving note, channel and clock behavior', () => {

@@ -50,6 +50,7 @@ describe('LCXL Mk2 fixed profile', () => {
   });
   it('follows the audible playhead, restores step colours after stop and ignores other playing patterns', () => {
     const r = rig(); r.state.cells = ['hit', 'modified', 'locked', ...Array<StepLight>(29).fill('empty')];
+    r.surface.follow = true;
     expect(r.surface.leds().slice(0, 4)).toEqual([[24, 28], [25, 29], [26, 13], [27, 12]]);
     r.state.playhead = { pattern: 'a', step: 2.4 }; expect(r.surface.leds()[2]).toEqual([26, 15]);
     r.state.playhead = { pattern: 'a', step: 3 }; expect(r.surface.leds()[3]).toEqual([27, 62]);
@@ -58,6 +59,19 @@ describe('LCXL Mk2 fixed profile', () => {
     r.surface.follow = true; r.state.playhead = { pattern: 'other', step: 20 }; r.surface.leds(); expect(r.surface.page).toBe(0);
     r.state.playhead = null; expect(r.surface.leds()[2]).toEqual([26, 13]);
     r.surface.movePage(1); r.state.pattern = 'b'; r.surface.state(); expect(r.surface.page).toBe(0);
+  });
+  it('keeps the editing page fixed during playback unless follow is explicitly enabled', () => {
+    const r = rig(64);
+    expect(r.surface.follow).toBe(false);
+    r.state.playhead = { pattern: 'a', step: 35 }; r.surface.leds();
+    expect(r.surface.page).toBe(0);
+    r.arrow(107); expect(r.surface.page).toBe(1);
+    r.state.playhead.step = 50; r.surface.leds();
+    expect(r.surface.page).toBe(1);
+    r.note(41); expect(r.toggle).toHaveBeenLastCalledWith(16);
+    expect(r.surface.leds().slice(0, 16).every(([, colour]) => colour === 12)).toBe(true);
+    r.state.playhead.step = 19; expect(r.surface.leds()[3]).toEqual([27, 62]);
+    r.state.playhead = null; r.surface.leds(); expect(r.surface.page).toBe(1);
   });
   it('classifies musical modifiers and parameter locks without treating velocity as a modifier', () => {
     expect(stepLight(null, { locks: { 1: 30 } })).toBe('empty');

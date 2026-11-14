@@ -89,9 +89,79 @@ test('click learn picks a base synth control without changing it or editing a va
   const control = page.locator('[data-midi-target^="param:"]:visible').first();
   const id = Number((await control.getAttribute('data-midi-target'))!.split(':')[1]);
   const before = await page.evaluate((id) => (window as unknown as W).clatter.project.kit.synth.params[id], id);
-  await control.click(); await cc(page, 0);
+  await control.click();
+  await expect(control).toHaveAttribute('data-midi-selected', '');
+  await expect(control).toHaveCSS('outline-style', 'double');
+  await cc(page, 0);
   expect(await page.evaluate((id) => (window as unknown as W).clatter.project.kit.synth.params[id], id)).toBe(before);
   expect(await page.evaluate(() => (window as unknown as W).clatter.midiLearn.bindings[0]?.target)).toBe(`param:${id}`);
   await page.evaluate(() => (window as unknown as W).clatter.setSlot(0));
   await expect(page.locator(`[data-param="${id}"]:visible`)).not.toHaveAttribute('data-midi-target');
+});
+
+test('previews and selects transport without playing, learns a note button, and toggles from MIDI and mouse', async ({ page }) => {
+  const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
+  await boot(page); await enable(page);
+  await expect(page.getByLabel('MIDI learn control').locator('option')).toContainText(['TEMPO', 'MASTER · VOLUME', 'TRANSPORT · PLAY/STOP TOGGLE', 'TRANSPORT · PLAY', 'TRANSPORT · STOP']);
+  await page.getByRole('button', { name: 'CHOOSE ON SCREEN', exact: true }).click();
+  const play = page.locator('[data-test=play]'), stop = page.locator('[data-test=stop]'), strip = page.locator('[data-test=midi-learn-strip]');
+  await play.hover(); await expect(strip).toContainText('POINTING AT TRANSPORT · PLAY/STOP TOGGLE');
+  expect(await page.evaluate(() => (window as unknown as W).clatter.midiLearn.pending)).toBeNull();
+  await play.click();
+  await expect(play).toHaveAttribute('data-midi-selected', '');
+  await expect(strip).toContainText('PRESS A MIDI BUTTON → TRANSPORT · PLAY/STOP TOGGLE');
+  await stop.hover(); await expect(strip).toContainText('POINTING AT TRANSPORT · STOP');
+  await expect(play).toHaveAttribute('data-midi-selected', '');
+  expect(await page.evaluate(() => (window as unknown as W).clatter.ui.playing)).toBe(false);
+  const note = (bytes: number[]) => page.evaluate(b => (window as unknown as W).sendMidi(b), bytes);
+  await note([0x90, 60, 127]); await note([0x90, 60, 127]); await note([0x80, 60, 64]);
+  expect(await page.evaluate(() => (window as unknown as W).clatter.ui.playing)).toBe(false);
+  await expect(strip).toHaveCount(0); await expect(play).not.toHaveAttribute('data-midi-selected');
+  await note([0x90, 60, 127]);
+  await expect(play).toHaveText('■ STOP');
+  await note([0x90, 60, 127]); await note([0x90, 60, 0]);
+  expect(await page.evaluate(() => (window as unknown as W).clatter.ui.playing)).toBe(true);
+  await expect.poll(() => page.evaluate(() => (window as unknown as W).clatter.meters?.masterL ?? 0)).toBeGreaterThan(0.01);
+  await note([0x90, 60, 127]); await note([0x80, 60, 0]);
+  await expect(play).toHaveText('▶ PLAY');
+  await play.click(); await expect(play).toHaveText('■ STOP');
+  // Selecting the toggle while it is playing must not stop it either.
+  await openLearn(page); await page.getByRole('button', { name: 'CHOOSE ON SCREEN' }).click();
+  await play.click(); expect(await page.evaluate(() => (window as unknown as W).clatter.ui.playing)).toBe(true);
+  await page.getByRole('button', { name: 'CANCEL (ESC)', exact: true }).click();
+  await play.click(); await expect(play).toHaveText('▶ PLAY');
+  await page.reload(); await page.waitForSelector('#transport');
+  await openLearn(page); await page.getByRole('button', { name: 'ENABLE MIDI', exact: true }).click();
+  await expect(page.locator('.midi-assignments')).toContainText('PLAY/STOP TOGGLE');
+  await expect(page.locator('.midi-assignments')).toContainText('CH1 NOTE 60');
+  await page.getByRole('button', { name: 'DONE', exact: true }).click();
+  await note([0x90, 60, 127]); await expect(play).toHaveText('■ STOP');
+  expect(errors).toEqual([]);
+});
+
+test('learns a CC transport button from the dropdown and keeps capture and release inert', async ({ page }) => {
+  await boot(page); await enable(page);
+  await page.getByLabel('MIDI learn control').selectOption('transport:toggle');
+  await page.getByRole('button', { name: 'LEARN CONTROL', exact: true }).click();
+  await cc(page, 0, 20); await expect(page.locator('[data-test=midi-learn-strip]')).toBeVisible();
+  await cc(page, 127, 20); await cc(page, 0, 20);
+  expect(await page.evaluate(() => (window as unknown as W).clatter.ui.playing)).toBe(false);
+  await cc(page, 127, 20); await expect(page.locator('[data-test=play]')).toHaveText('■ STOP');
+  await cc(page, 127, 20); await cc(page, 0, 20);
+  expect(await page.evaluate(() => (window as unknown as W).clatter.ui.playing)).toBe(true);
+  await cc(page, 127, 20); await expect(page.locator('[data-test=play]')).toHaveText('▶ PLAY');
+});
+
+test('a second toggle cancels playback while audio is still starting', async ({ page }) => {
+  await boot(page);
+  await page.evaluate(async () => {
+    const a = (window as unknown as W).clatter;
+    const start = a.host.start.bind(a.host);
+    let ready!: () => void;
+    a.host.start = () => new Promise<void>(resolve => { ready = resolve; });
+    try { a.togglePlay(); a.togglePlay(); ready(); await Promise.resolve(); }
+    finally { a.host.start = start; }
+  });
+  expect(await page.evaluate(() => (window as unknown as W).clatter.ui.playing)).toBe(false);
+  await page.locator('[data-test=play]').click(); await expect(page.locator('[data-test=play]')).toHaveText('■ STOP');
 });

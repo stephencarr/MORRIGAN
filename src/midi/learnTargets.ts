@@ -7,6 +7,9 @@ export function learnTargets(app: App): LearnTarget[] {
   const targets: LearnTarget[] = [
     { id: 'tempo', label: 'TEMPO', min: 30, max: 300, step: 1, get: () => app.project.tempo, set: (v) => { if (!app.midi.prefs.clockIn) app.setTempo(v); } },
     { id: 'master:volume', label: 'MASTER · VOLUME', min: 0, max: 1, step: 0.001, get: () => app.project.master.volume, set: (v) => app.setMaster({ volume: v }, 'MIDI MASTER') },
+    { id: 'transport:toggle', label: 'TRANSPORT · PLAY/STOP TOGGLE', trigger: () => app.togglePlay() },
+    { id: 'transport:play', label: 'TRANSPORT · PLAY', trigger: () => { void app.play(); } },
+    { id: 'transport:stop', label: 'TRANSPORT · STOP', trigger: () => app.stop() },
   ];
   const seen = new Set<number>();
   for (const p of [...VOICE_PARAMS.flat(), ...FX_PARAMS]) {

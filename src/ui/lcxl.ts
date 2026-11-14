@@ -20,7 +20,7 @@ export function lcxlDialog(app: App): void {
   const input = makeSelect('LCXL input'), output = makeSelect('LCXL LED output');
   h('p', '', box, 'SEND SELECT ↑/↓ moves track focus. TRACK SELECT ←/→ pages through the pattern. The upper button row edits steps 1–8; the lower row edits 9–16 of the displayed page. A press adds/removes a hit.');
   h('p', 'hint', box, 'OFF: empty · GREEN: hit · AMBER: modifier/condition · RED: parameter lock/rule. The current step becomes brighter; an empty current step is yellow. Mouse edits and undo update the LEDs too.');
-  h('p', 'hint', box, 'Knobs and faders remain available to MIDI learn. The four Device/Mute/Solo/Record Arm buttons are reserved in this experimental profile. The LCXL output is used for LEDs only.');
+  h('p', 'hint', box, 'The editing page stays where you choose during playback. FOLLOW is optional. Knobs, faders and mode buttons are available to MIDI learn; the 16 step buttons and navigation arrows keep their sequencer functions. The LCXL output is used for LEDs only.');
   const message = h('p', 'hint', box);
   message.setAttribute('role', 'status');
   const row = h('div', 'btnrow', box);

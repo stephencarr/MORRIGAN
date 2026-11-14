@@ -134,3 +134,42 @@ test('permission refusal leaves the stock instrument playable', async ({ page })
   await page.locator('[data-test=play]').click();
   await expect.poll(() => page.evaluate(() => (window as unknown as W).clatter.meters?.masterL ?? 0)).toBeGreaterThan(0.01);
 });
+
+test('keeps the editing page under manual control while the real sequencer crosses bars', async ({ page }) => {
+  await boot(page); await enable(page);
+  const follow = page.getByRole('button', { name: 'LCXL follow playhead', exact: true });
+  await expect(follow).toHaveAttribute('aria-pressed', 'false');
+  await page.evaluate(() => { const a = (window as unknown as W).clatter; a.clearPattern(); a.setTempo(300); });
+  await page.locator('[data-test=play]').click();
+  await page.waitForFunction(() => ((window as unknown as W).clatter.playhead()?.step ?? -1) >= 17);
+  await expect(page.locator('[data-test=lcxl-strip]')).toContainText('STEPS 1–16');
+  await send(page, [0xb8, 107, 127]); await send(page, [0xb8, 107, 0]);
+  await expect(page.locator('[data-test=lcxl-strip]')).toContainText('STEPS 17–32');
+  await send(page, [0x98, 41, 127]); await send(page, [0x98, 41, 0]);
+  expect(await page.evaluate(() => { const a = (window as unknown as W).clatter; return !!a.hitAt(a.ui.track, 16) && !a.hitAt(a.ui.track, 0); })).toBe(true);
+  await page.waitForFunction(() => ((window as unknown as W).clatter.playhead()?.step ?? -1) < 16);
+  await expect(page.locator('[data-test=lcxl-strip]')).toContainText('STEPS 17–32');
+  await expect.poll(() => led(page, 24)).toBe(28);
+  await page.locator('[data-test=play]').click();
+  await expect(page.locator('[data-test=lcxl-strip]')).toContainText('STEPS 17–32');
+});
+
+test('learns a mode-button transport toggle alongside the fixed sequencer profile', async ({ page }) => {
+  await boot(page); await enable(page);
+  await page.getByRole('menuitem', { name: 'MIDI', exact: true }).click();
+  await page.getByText('MIDI learn…', { exact: true }).click();
+  await page.getByRole('button', { name: 'CHOOSE ON SCREEN', exact: true }).click();
+  await page.locator('[data-test=play]').click();
+  await send(page, [0x98, 105, 127]); await send(page, [0x88, 105, 0]);
+  expect(await page.evaluate(() => (window as unknown as W).clatter.ui.playing)).toBe(false);
+  await send(page, [0x98, 105, 127]); await send(page, [0x98, 105, 127]); await send(page, [0x98, 105, 0]);
+  await expect(page.locator('[data-test=play]')).toHaveText('■ STOP');
+  await send(page, [0x98, 105, 127]); await send(page, [0x88, 105, 0]);
+  await expect(page.locator('[data-test=play]')).toHaveText('▶ PLAY');
+  // CC105 remains track navigation; the Note105 assignment cannot replace it.
+  await send(page, [0xb8, 105, 127]); await send(page, [0xb8, 105, 0]);
+  expect(await page.evaluate(() => (window as unknown as W).clatter.trackIndexOf((window as unknown as W).clatter.ui.track))).toBe(1);
+  await page.evaluate(() => (window as unknown as W).clatter.clearPattern());
+  await send(page, [0x98, 41, 127]); await send(page, [0x98, 41, 0]);
+  await expect.poll(() => led(page, 24)).toBe(28);
+});

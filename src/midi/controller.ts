@@ -11,7 +11,7 @@
  *
  * Copyright (C) 2026 The CLATTER contributors. SPDX-License-Identifier: GPL-3.0-only
  */
-import type { ControlChange } from './learn';
+import type { ControlChange, NoteControl } from './learn';
 import type { ClockFollower } from '@slopfactory/core/midi';
 import { CLOCK, CONTINUE, START, STOP } from './messages';
 import { MidiOutput } from './output';
@@ -90,6 +90,9 @@ export const defaultMidiPrefs = (): MidiPrefs => ({ outId: null, inId: null, not
 
 export interface MidiHandlers {
   cc?(message: ControlChange): void;
+  /** Return true to consume a learned button before drum triggering or recording. */
+  noteControl?(message: NoteControl): boolean;
+  resetControls?(): void;
   /** a note arrived: (channel 1-16, note, velocity) */
   note(channel: number, note: number, vel: number): void;
   tempo(bpm: number): void;
@@ -140,6 +143,7 @@ export class MidiController {
         h.changed();
       },
       onInputLost: () => {
+        h.resetControls?.();
         h.message?.('MIDI INPUT DISCONNECTED');
         h.changed();
       },
@@ -184,6 +188,7 @@ export class MidiController {
   }
 
   selectInput(id: string | null): void {
+    this.h.resetControls?.();
     this.prefs.inId = id;
     this.access.openInput(id, (data, ts) => this.receive(data, ts));
     this.h.changed();
@@ -203,6 +208,7 @@ export class MidiController {
     if (type === 0xb0 && data[1]! < 120 && this.prefs.inId) {
       this.h.cc?.({ device: this.prefs.inId, channel: ch, cc: data[1]!, value: data[2]! });
     }
+    if ((type === 0x90 || type === 0x80) && this.prefs.inId && this.h.noteControl?.({ device: this.prefs.inId, channel: ch, note: data[1]!, value: type === 0x80 ? 0 : data[2]! })) return;
     if (type === 0x90 && (data[2] ?? 0) > 0) {
       this.pushLog(`IN  CH${ch} NOTE ${data[1]} VEL ${data[2]}`);
       if (this.prefs.notesIn) this.h.note(ch, data[1] ?? 0, data[2] ?? 0);

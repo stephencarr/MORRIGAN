@@ -3,7 +3,7 @@
  */
 import type { App } from '../app/app';
 import type { Hit, StepSound, TrigCond } from '../model/types';
-import { LCXL_OFF, LCXL_TEMPLATE, LcxlSurface, lcxlLeds, lcxlTemplate, selectLcxlTemplate, type StepLight } from './lcxl';
+import { LCXL_CHANNEL, LCXL_OFF, LCXL_TEMPLATE, LcxlSurface, lcxlLeds, lcxlTemplate, selectLcxlTemplate, type StepLight } from './lcxl';
 
 export function stepLight(hit: Hit | null | undefined, sound?: StepSound, condition?: TrigCond): StepLight {
   if (!hit) return 'empty';
@@ -83,6 +83,7 @@ export class LcxlSession {
     // Display/update buffer 0, copy, no hardware flashing; the audio clock drives our playhead.
     if (!this.send([0xb8, 0, 48])) return;
     this.templateReady = true;
+    this.app.midiLearn.release();
     this.surface.release(); this.leds.clear();
     this.message = 'Factory Template 1 · Up/Down: track · Left/Right: step page';
     this.changed(); this.frame();
@@ -90,6 +91,7 @@ export class LcxlSession {
   disable(): void {
     if (this.enabled) this.send(lcxlLeds([...Array.from({ length: 16 }, (_, i): [number, number] => [24 + i, LCXL_OFF]), ...[44, 45, 46, 47].map((i): [number, number] => [i, LCXL_OFF])]));
     this.enabled = false; this.templateReady = false; this.wasConnected = false;
+    this.app.midiLearn.release();
     this.app.midi.reserveOutput(null);
     this.surface.release(); this.leds.clear();
     this.message = 'Mk2 sequencer profile disabled.'; this.changed();
@@ -105,9 +107,10 @@ export class LcxlSession {
     }
   }
   private receive(data: Uint8Array, device: string | null): boolean {
-    if (!this.enabled || device !== this.inputId) return false;
+    if (!this.enabled || !device || device !== this.inputId) return false;
     const template = lcxlTemplate(data);
     if (template !== null) {
+      this.app.midiLearn.release();
       this.templateReady = template === LCXL_TEMPLATE;
       this.surface.release(); this.leds.clear();
       this.message = this.templateReady ? 'Factory Template 1 active' : 'Another template is selected. Return to Factory 1 to use the sequencer.';
@@ -115,6 +118,12 @@ export class LcxlSession {
     }
     // While disconnected or on another template, controller buttons must never become drum notes.
     if (!this.connected || !this.templateReady) return (data[0]! & 0xf0) === 0x90 || (data[0]! & 0xf0) === 0x80 || (data[0]! & 0xf0) === 0xb0;
+    // Mode buttons are available to learn, but never fall through to drum notes.
+    const type = data[0]! & 0xf0;
+    if (data.length === 3 && (data[0]! & 15) === LCXL_CHANNEL && (type === 0x90 || type === 0x80) && data[1]! >= 105 && data[1]! <= 108 && data[2]! <= 127) {
+      this.app.midiLearn.receiveNote({ device, channel: LCXL_CHANNEL + 1, note: data[1]!, value: type === 0x80 ? 0 : data[2]! });
+      return true;
+    }
     const consumed = this.surface.receive(data);
     if (consumed) { this.leds.clear(); this.frame(); }
     return consumed;

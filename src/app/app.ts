@@ -162,6 +162,8 @@ export class App {
   soundClip: StepSound | null = null;
   private fns = new Map<Topic, Set<() => void>>();
   private stopTicker: (() => void) | null = null;
+  private playStarting = false;
+  private playRequest = 0;
   private sentSamples = new Set<string>();
   private saveTimer: ReturnType<typeof setTimeout> | null = null;
   private evolveHome: SynthKit | null = null;
@@ -241,6 +243,8 @@ export class App {
     this.midi = new MidiController(
       {
         cc: (message) => this.midiLearn.receive(message),
+        noteControl: (message) => this.midiLearn.receiveNote(message),
+        resetControls: () => this.midiLearn?.release(),
         note: (ch, note, vel) => this.midiNote(ch, note, vel),
         tempo: (bpm) => this.setTempo(bpm, false),
         transport: (m) => (m === 'stop' ? this.stop() : void this.play()),
@@ -570,13 +574,18 @@ export class App {
 
   // ------------------------------------------------------------------ transport
   async play(): Promise<void> {
-    if (this.ui.playing) return;
+    if (this.ui.playing || this.playStarting) return;
+    const request = ++this.playRequest;
+    this.playStarting = true;
     try {
       await this.host.start();
     } catch {
-      this.say(`AUDIO FAILED: ${this.host.error}`);
+      if (request === this.playRequest) this.say(`AUDIO FAILED: ${this.host.error}`);
       return;
+    } finally {
+      if (request === this.playRequest) this.playStarting = false;
     }
+    if (request !== this.playRequest) return; // Stop/toggle during audio startup cancels this request.
     configureEngine(this.live, this.project, this.library);
     this.sequence.reset();
     this.sequence.bump();
@@ -597,6 +606,8 @@ export class App {
   }
 
   stop(): void {
+    this.playRequest++;
+    this.playStarting = false;
     if (!this.ui.playing) return;
     this.stopTicker?.();
     this.stopTicker = null;
@@ -611,7 +622,7 @@ export class App {
   }
 
   togglePlay(): void {
-    if (this.ui.playing) this.stop();
+    if (this.ui.playing || this.playStarting) this.stop();
     else void this.play();
   }
 

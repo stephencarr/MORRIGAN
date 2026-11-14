@@ -18,8 +18,12 @@ export function transportWindow(app: App, chrome: HTMLElement, menubar: HTMLElem
 
   // play and tempo
   const play = h('div', 'cluster', bar);
-  button(panel, play, '▶ PLAY', () => void app.play(), { on: () => app.ui.playing, title: 'Play (space)' }).dataset.test = 'play';
-  button(panel, play, '■ STOP', () => app.stop(), { title: 'Stop (space, esc)' }).dataset.test = 'stop';
+  const toggle = button(panel, play, '▶ PLAY', () => app.togglePlay(), { on: () => app.ui.playing, label: () => app.ui.playing ? '■ STOP' : '▶ PLAY', title: 'Play / stop (space)' });
+  toggle.dataset.test = 'play';
+  toggle.dataset.midiTarget = 'transport:toggle';
+  const stop = button(panel, play, '■ STOP', () => app.stop(), { title: 'Stop (space, esc)' });
+  stop.dataset.test = 'stop';
+  stop.dataset.midiTarget = 'transport:stop';
   h('div', 'lbl', play, 'BPM');
   num(panel, play, { get: () => app.project.tempo, set: (v) => app.setTempo(v), min: 30, max: 300, step: 1, title: 'Tempo (drag, or click and type)' }).dataset.test = 'bpm';
   play.querySelector<HTMLElement>('[data-test=bpm]')!.dataset.midiTarget = 'tempo';

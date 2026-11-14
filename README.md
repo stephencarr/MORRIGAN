@@ -70,19 +70,23 @@ hosted from this repository. There is no separate CLATTER repository or site dep
 1. In Chrome or Edge, connect your controller and open **MIDI → MIDI learn…**.
 2. Enable MIDI, allow browser access and select your MIDI input.
 3. Choose a control from the list and press **LEARN CONTROL**, or press **CHOOSE ON SCREEN**
-   and click an outlined control. In the synth editor, select **BASE** first.
-4. Move an absolute CC knob or fader. The first message saves the assignment without changing
-   the sound; subsequent messages control it. **Escape** cancels learning.
+   and hover to see a control's name, then click to select it without activating it. The selected
+   target stays outlined while waiting for MIDI. In the synth editor, select **BASE** first.
+4. Move an absolute CC knob/fader for continuous controls, or press a Note/momentary CC button
+   for a transport action. The first message saves the assignment without performing the action.
+   For buttons, release and press again to use the mapping; releases and repeated held messages
+   are ignored. Click **CANCEL** or press **Escape** to cancel learning.
 5. Open the same dialog to remove individual assignments or clear them all.
 
 Available: base synthesis and LXR FX parameters, track volume/pan/filter/FX send, master
-volume and tempo. Parameters keep their stock ranges. Assignments bind to device, channel
+volume, tempo, and **Play/Stop toggle**, **Play**, **Stop**. The on-screen Play button also toggles
+to Stop while playing. Parameters keep their stock ranges. Assignments bind to device, channel
 and control, survive reloads in the same browser and stay separate from project files.
 Enable MIDI each browser session. Switching tracks does not redirect a mapping;
 removed tracks leave their assignments inactive. Relearning replaces conflicting mappings.
-External MIDI clock takes priority over learned tempo. Existing CLATTER note input,
-recording, clock and output retain their stock behavior. Relative encoders, notes as learn
-sources, variation overrides and channel-mode CC 120–127 are not mapped by this feature.
+External MIDI clock takes priority over learned tempo. Learned Note buttons are consumed before
+drum triggering/recording; unassigned notes work normally outside learn mode. Relative encoders,
+notes for continuous parameters, variation overrides and channel-mode CC 120–127 are not mapped.
 Automated MIDI tests use simulated input and the real audio engine.
 
 ## Launch Control XL Mk2 experiment
@@ -91,5 +95,6 @@ Open **MIDI → Launch Control XL Mk2…** in CLATTER and enable the fixed seque
 It selects Factory Template 1, maps Up/Down to track focus and Left/Right to 16-step pages,
 and makes the two button rows the selected track’s step sequencer. LEDs show hits, modifiers,
 parameter locks and the audible playhead. Mouse edits and undo update the hardware too.
+Pages stay under manual control during playback; **FOLLOW** is off unless explicitly enabled.
 See [setup, colour legend and protocol notes](docs/LCXL_MK2.md). No individual button learning
 is needed; knobs/faders can still use MIDI learn. The custom MORRIGAN hardware comes later.

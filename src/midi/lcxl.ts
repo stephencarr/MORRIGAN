@@ -32,7 +32,7 @@ export interface LcxlActions {
 /** The sequencer logic is independent of Web MIDI and the application renderer. */
 export class LcxlSurface {
   page = 0;
-  follow = true;
+  follow = false;
   private pattern = '';
   private held = new Set<string>();
   constructor(private actions: LcxlActions) {}
