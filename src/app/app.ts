@@ -1229,11 +1229,13 @@ export class App {
 
 
   undo(): void {
+    this.lcxl.surface.cancelSteps();
     const l = this.history.undo();
     this.say(l ? `UNDO ${l}` : 'NOTHING TO UNDO');
   }
 
   redo(): void {
+    this.lcxl.surface.cancelSteps();
     const l = this.history.redo();
     this.say(l ? `REDO ${l}` : 'NOTHING TO REDO');
   }
@@ -2358,7 +2360,7 @@ export class App {
   }
 
   /** Lock a parameter on the target steps (null: back to the track's value). */
-  setStepLock(p: number, v: number | null): void {
+  setStepLock(p: number, v: number | null, targets = this.soundTargets()): void {
     this.editStepSound((s, t) => {
       const def = lockableParam(s.voice ?? t.sound.trigger, p);
       if (!def) return s;
@@ -2367,7 +2369,7 @@ export class App {
         if (s.locks && !Object.keys(s.locks).length) delete s.locks;
       } else (s.locks ??= {})[p] = clamp(Math.round(v), 0, def.max);
       return s;
-    }, 'STEP LOCK');
+    }, 'STEP LOCK', targets);
   }
 
   setStepAlt(alt: StepSound['alt'] | null): void {

@@ -7,6 +7,7 @@ export const LCXL_CHANNEL = 8; // zero based
 export const LCXL_STEPS = [41, 42, 43, 44, 57, 58, 59, 60, 73, 74, 75, 76, 89, 90, 91, 92] as const;
 export const LCXL_HEADER = [0xf0, 0, 0x20, 0x29, 2, 0x11];
 export const LCXL_OFF = 12; // Copy + Clear; green and red both zero.
+export const LCXL_TAP_MS = 500;
 export const selectLcxlTemplate = (): number[] => [...LCXL_HEADER, 0x77, LCXL_TEMPLATE, 0xf7];
 export const lcxlLeds = (pairs: readonly [number, number][]): number[] => [...LCXL_HEADER, 0x78, LCXL_TEMPLATE, ...pairs.flat(), 0xf7];
 export function lcxlTemplate(data: Uint8Array): number | null {
@@ -18,6 +19,7 @@ export interface LcxlState {
   pattern: string;
   steps: number;
   track: number;
+  trackId: string;
   tracks: number;
   trackName: string;
   cells: readonly StepLight[];
@@ -27,7 +29,11 @@ export interface LcxlActions {
   state(): LcxlState;
   selectTrack(index: number): void;
   toggleStep(step: number): void;
+  selectStep?(step: number): void;
+  endSteps?(): void;
 }
+
+interface HeldStep { pattern: string; trackId: string; step: number; edited: boolean; pressedAt: number }
 
 /** The sequencer logic is independent of Web MIDI and the application renderer. */
 export class LcxlSurface {
@@ -35,21 +41,38 @@ export class LcxlSurface {
   follow = false;
   private pattern = '';
   private held = new Set<string>();
-  constructor(private actions: LcxlActions) {}
-  release(): void { this.held.clear(); }
+  private stepsHeld = new Map<string, HeldStep>();
+  constructor(private actions: LcxlActions, private now = () => performance.now()) {}
+  release(): void { this.cancelSteps(); this.held.clear(); }
+  /** Cancel pending taps; already-written locks remain and their undo gesture closes. */
+  cancelSteps(): void {
+    const hadSteps = this.stepsHeld.size > 0;
+    this.stepsHeld.clear();
+    if (hadSteps) this.actions.endSteps?.();
+  }
+  heldSteps(): readonly HeldStep[] { this.state(); return [...this.stepsHeld.values()]; }
+  hasStepButtonsDown(): boolean { return LCXL_STEPS.some((note) => this.held.has(`note:${note}`)); }
+  useHeldSteps(): readonly HeldStep[] {
+    const steps = this.heldSteps();
+    for (const step of steps) step.edited = true;
+    return steps;
+  }
   state(): LcxlState {
     const state = this.actions.state();
+    if ([...this.stepsHeld.values()].some((s) => s.pattern !== state.pattern || s.trackId !== state.trackId || s.step >= state.steps)) this.cancelSteps();
     if (state.pattern !== this.pattern) { this.page = 0; this.pattern = state.pattern; }
-    if (this.follow && state.playhead?.pattern === state.pattern) this.page = Math.floor(state.playhead.step / 16);
+    if (this.follow && !this.stepsHeld.size && state.playhead?.pattern === state.pattern) this.page = Math.floor(state.playhead.step / 16);
     this.page = Math.max(0, Math.min(Math.ceil(state.steps / 16) - 1, this.page));
     return state;
   }
   moveTrack(delta: number): void {
+    this.cancelSteps();
     const s = this.state();
     const next = Math.max(0, Math.min(s.tracks - 1, s.track + delta));
     if (next !== s.track && next >= 0) this.actions.selectTrack(next);
   }
   movePage(delta: number): void {
+    this.cancelSteps();
     const s = this.state();
     this.follow = false;
     this.page = Math.max(0, Math.min(Math.ceil(s.steps / 16) - 1, this.page + delta));
@@ -64,7 +87,15 @@ export class LcxlSurface {
     const side = note && number >= 105 && number <= 108;
     if (!(note && step >= 0) && !arrow && !side) return false;
     const key = `${arrow ? 'cc' : 'note'}:${number}`;
-    if (type === 0x80 || value === 0) { this.held.delete(key); return true; }
+    if (type === 0x80 || value === 0) {
+      this.state(); // Invalidate a hold if focus/pattern/length changed before release.
+      this.held.delete(key);
+      const held = this.stepsHeld.get(key);
+      this.stepsHeld.delete(key);
+      if (held && !held.edited && this.now() - held.pressedAt < LCXL_TAP_MS) this.actions.toggleStep(held.step);
+      if (note && step >= 0 && !this.stepsHeld.size) this.actions.endSteps?.();
+      return true;
+    }
     if (this.held.has(key)) return true;
     this.held.add(key);
     if (side) return true; // The four mode buttons are reserved, not drum triggers.
@@ -73,7 +104,10 @@ export class LcxlSurface {
       else this.movePage(number === 106 ? -1 : 1);
     } else {
       const s = this.state(), absolute = this.page * 16 + step;
-      if (absolute < s.steps) this.actions.toggleStep(absolute);
+      if (absolute < s.steps) {
+        this.stepsHeld.set(key, { pattern: s.pattern, trackId: s.trackId, step: absolute, edited: false, pressedAt: this.now() });
+        this.actions.selectStep?.(absolute);
+      }
     }
     return true;
   }

@@ -3,7 +3,9 @@
  */
 import type { App } from '../app/app';
 import type { Hit, StepSound, TrigCond } from '../model/types';
-import { LCXL_CHANNEL, LCXL_OFF, LCXL_TEMPLATE, LcxlSurface, lcxlLeds, lcxlTemplate, selectLcxlTemplate, type StepLight } from './lcxl';
+import { LCXL_CHANNEL, LCXL_OFF, LCXL_STEPS, LCXL_TEMPLATE, LcxlSurface, lcxlLeds, lcxlTemplate, selectLcxlTemplate, type StepLight } from './lcxl';
+import { formatValue, paramDef } from '../sound/lxrParams';
+import { lockableParam, lockableParams } from '../sound/stepSound';
 
 export function stepLight(hit: Hit | null | undefined, sound?: StepSound, condition?: TrigCond): StepLight {
   if (!hit) return 'empty';
@@ -21,6 +23,8 @@ export class LcxlSession {
   inputId: string | null = null;
   outputId: string | null = null;
   message = 'Connect your Launch Control XL Mk2, then enable the profile.';
+  heldMessage = '';
+  private lockGesture = false;
   private leds = new Map<number, number>();
   private previousOutput: MIDIOutput | null = null;
   private wasConnected = false;
@@ -36,14 +40,24 @@ export class LcxlSession {
     this.surface = new LcxlSurface({
       state: () => {
         const p = app.pattern, t = app.track;
-        return { pattern: p.id, steps: p.steps, track: app.trackIndexOf(t.id), tracks: app.project.tracks.length, trackName: t.name,
+        return { pattern: p.id, steps: p.steps, track: app.trackIndexOf(t.id), trackId: t.id, tracks: app.project.tracks.length, trackName: t.name,
           cells: Array.from({ length: p.steps }, (_, i) => stepLight(p.grids[t.id]?.[i], p.sounds?.[t.id]?.[i], p.trig?.[t.id]?.[i])), playhead: app.playhead() };
       },
       selectTrack: (i) => { const t = app.project.tracks[i]; if (t) { app.select(null); app.selectTrack(t.id); } },
       toggleStep: (step) => { app.select(null); app.setCursor({ track: app.ui.track, step }); app.toggleCell(app.ui.track, step); },
+      selectStep: (step) => {
+        app.select(null); app.setCursor({ track: app.ui.track, step });
+        this.heldMessage = `HOLD STEP ${step + 1} · TURN A MAPPED SYNTH KNOB`;
+        this.changed();
+      },
+      endSteps: () => {
+        if (this.lockGesture) { this.lockGesture = false; app.endDrag(); }
+        this.heldMessage = ''; this.changed();
+      },
     });
     app.midi.intercept((data, device) => this.receive(data, device));
-    app.on('midi', () => this.frame());
+    app.on('midi', () => { if (app.midiLearn.active) this.surface.release(); this.frame(); });
+    app.on('project', () => this.surface.cancelSteps());
   }
   onChange(fn: () => void): () => void { this.listeners.add(fn); return () => this.listeners.delete(fn); }
   private changed(): void { for (const fn of this.listeners) fn(); }
@@ -102,6 +116,7 @@ export class LcxlSession {
     try { port.send(bytes); return true; }
     catch {
       this.templateReady = false;
+      this.surface.release();
       this.message = 'Could not send Mk2 LED feedback. Check the output and re-enable the profile.';
       this.changed(); return false;
     }
@@ -120,13 +135,52 @@ export class LcxlSession {
     if (!this.connected || !this.templateReady) return (data[0]! & 0xf0) === 0x90 || (data[0]! & 0xf0) === 0x80 || (data[0]! & 0xf0) === 0xb0;
     // Mode buttons are available to learn, but never fall through to drum notes.
     const type = data[0]! & 0xf0;
+    if (this.app.midiLearn.active && (data[0]! & 15) === LCXL_CHANNEL && (type === 0x90 || type === 0x80) && LCXL_STEPS.includes(data[1]! as typeof LCXL_STEPS[number])) return true;
     if (data.length === 3 && (data[0]! & 15) === LCXL_CHANNEL && (type === 0x90 || type === 0x80) && data[1]! >= 105 && data[1]! <= 108 && data[2]! <= 127) {
       this.app.midiLearn.receiveNote({ device, channel: LCXL_CHANNEL + 1, note: data[1]!, value: type === 0x80 ? 0 : data[2]! });
       return true;
     }
     const consumed = this.surface.receive(data);
     if (consumed) { this.leds.clear(); this.frame(); }
+    if (!consumed && type === 0xb0 && data.length === 3 && data[1]! < 120 && data[2]! <= 127 && !this.app.midiLearn.active && this.surface.hasStepButtonsDown()) {
+      this.lockFromKnob(device, (data[0]! & 15) + 1, data[1]!, data[2]!);
+      return true;
+    }
     return consumed;
+  }
+  private lockFromKnob(device: string, channel: number, cc: number, value: number): void {
+    const app = this.app, steps = this.surface.useHeldSteps();
+    if (!steps.length) { this.heldMessage = 'HOLD CANCELLED · RELEASE AND PRESS A STEP AGAIN'; this.changed(); return; }
+    if (app.midi.prefs.inChannel && channel !== app.midi.prefs.inChannel) return;
+    const binding = app.midiLearn.bindings.find((b) => b.kind !== 'note' && b.device === device && b.channel === channel && b.cc === cc);
+    const source = binding?.target.startsWith('param:') ? paramDef(Number(binding.target.slice(6))) : undefined;
+    if (!source || source.voice === undefined) {
+      this.heldMessage = 'STEP LOCK · USE A KNOB MAPPED TO A VOICE SYNTH PARAMETER';
+      this.changed(); return;
+    }
+    const messages: string[] = [];
+    for (const step of steps) {
+      const track = app.project.tracks.find((t) => t.id === step.trackId);
+      if (!track || track.sound.mode === 'sample') continue;
+      const sound = app.stepSound(track.id, step.step), trigger = sound?.voice ?? track.sound.trigger;
+      // A learned cutoff/decay/etc. can address the matching parameter on the held step's voice.
+      const def = lockableParam(trigger, source.id) ?? lockableParams(trigger).find((p) => p.group === source.group && p.label === source.label);
+      if (!def) continue;
+      const next = Math.round(value / 127 * def.max);
+      if (!app.hitAt(track.id, step.step) || sound?.locks?.[def.id] !== next) {
+        if (!this.lockGesture) { app.beginDrag('STEP LOCK'); this.lockGesture = true; }
+        app.paintCell(track.id, step.step, true);
+        app.setStepLock(def.id, next, [{ track: track.id, step: step.step }]);
+      }
+      messages.push(`STEP ${step.step + 1} · ${def.group} ${def.label} ${formatValue(def, next)}`);
+    }
+    this.heldMessage = messages.length ? `LOCK · ${messages.join(' / ')}` : 'STEP LOCK · THIS PARAMETER IS NOT AVAILABLE FOR THE HELD VOICE';
+    if (messages.length) {
+      if (app.ui.workspace !== 'sound') app.setWorkspace('sound');
+      if (app.ui.view !== 'pattern') app.setView('pattern');
+      app.say(this.heldMessage);
+    }
+    this.changed(); this.frame();
   }
   /** Called from CLATTER's animation frame, using its audible playhead, not a separate clock. */
   frame(): void {

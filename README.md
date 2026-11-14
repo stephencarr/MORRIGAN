@@ -96,5 +96,8 @@ It selects Factory Template 1, maps Up/Down to track focus and Left/Right to 16-
 and makes the two button rows the selected track’s step sequencer. LEDs show hits, modifiers,
 parameter locks and the audible playhead. Mouse edits and undo update the hardware too.
 Pages stay under manual control during playback; **FOLLOW** is off unless explicitly enabled.
+Tap a step to toggle it, or hold it and turn a learned synth knob to write a per-step parameter
+lock without changing the base kit. Locked steps turn red; STEP SOUND shows the locks and lets
+you remove them. A hold gesture is one Undo action. See the setup guide for supported parameters.
 See [setup, colour legend and protocol notes](docs/LCXL_MK2.md). No individual button learning
 is needed; knobs/faders can still use MIDI learn. The custom MORRIGAN hardware comes later.

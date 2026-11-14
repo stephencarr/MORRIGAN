@@ -22,8 +22,8 @@ active so they use the same Factory 1 messages.
 | --- | --- |
 | SEND SELECT Up / Down | Previous / next CLATTER track, stopping at the ends |
 | TRACK SELECT Left / Right | Previous / next 16-step page |
-| Upper eight channel buttons | Toggle steps 1–8 on the displayed page |
-| Lower eight channel buttons | Toggle steps 9–16 on the displayed page |
+| Upper eight channel buttons | Tap steps 1–8 to toggle; hold and turn a mapped knob to lock |
+| Lower eight channel buttons | Tap steps 9–16 to toggle; hold and turn a mapped knob to lock |
 | Knobs and faders | Available to the existing MIDI CC learn feature |
 | Device / Mute / Solo / Record Arm | Available to MIDI button learn; unassigned presses do not trigger drums |
 
@@ -36,8 +36,32 @@ ten-track defaults.
 The playhead lights only when it crosses that page. Click FOLLOW if you explicitly want
 automatic page changes; manual page selection turns it off again.
 All navigation and setup controls are also clickable in the LCXL bar. Buttons beyond
-the end of a short/partial page are off and do nothing. Button releases and repeated held
-messages do not toggle additional steps.
+the end of a short/partial page are off and do nothing. A short tap toggles once on release.
+Holding for half a second or moving a knob suppresses the toggle, so inspecting/editing an
+existing hit does not delete it. Repeated held messages do not toggle additional steps.
+
+## Hold a step and turn a knob
+
+First use MIDI learn to assign a knob to a voice synthesis control, such as FILTER CUTOFF,
+AMP DECAY or OSC COARSE. Hold a step button on the LCXL and turn that knob. The value becomes
+a parameter lock on the held step, the LED turns red, and the LCXL strip names the step,
+parameter and value. The STEP SOUND editor opens for inspection and mouse editing.
+
+The base kit stays unchanged. On release, the knob controls its normal learned destination
+again. An empty step gets a hit when its first lock is written. Multiple held steps can be
+locked together, and the entire hold gesture is one Undo action. Use the lock's **×** or
+**CLEAR LOCKS** in STEP SOUND to remove locks; the LEDs update from those mouse edits too.
+
+The held step's actual voice is used, including a per-step voice override. A knob mapped to
+another voice uses a matching group/name parameter when available (for example, another
+voice's filter cutoff). Unsupported parameters and sample-only tracks report that they
+cannot take that lock. Tempo, mixer controls and global FX are not voice step-lock targets;
+turning these or an unmapped knob while holding a step does not change the base sound or
+toggle the step.
+
+Track/page/pattern changes and Undo cancel pending holds. Release and press again before
+editing the new location. Disconnecting or switching templates closes the gesture and
+clears held buttons. Optional FOLLOW pauses page movement while steps are held.
 
 ## Learning controls without performing them
 

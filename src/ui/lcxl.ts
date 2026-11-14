@@ -18,7 +18,8 @@ export function lcxlDialog(app: App): void {
     return select;
   };
   const input = makeSelect('LCXL input'), output = makeSelect('LCXL LED output');
-  h('p', '', box, 'SEND SELECT ↑/↓ moves track focus. TRACK SELECT ←/→ pages through the pattern. The upper button row edits steps 1–8; the lower row edits 9–16 of the displayed page. A press adds/removes a hit.');
+  h('p', '', box, 'SEND SELECT ↑/↓ moves track focus. TRACK SELECT ←/→ pages through the pattern. The upper row edits steps 1–8; the lower row edits 9–16. Tap and release to add/remove a hit. Hold a step and turn a learned synth knob to write a parameter lock.');
+  h('p', 'hint', box, 'Locks use the held step’s voice; matching parameters work across voices. An empty step gets a hit when locked. Release returns knobs to normal control. Tempo, mixer and global FX are not step-lock targets. Inspect or remove locks in STEP SOUND.');
   h('p', 'hint', box, 'OFF: empty · GREEN: hit · AMBER: modifier/condition · RED: parameter lock/rule. The current step becomes brighter; an empty current step is yellow. Mouse edits and undo update the LEDs too.');
   h('p', 'hint', box, 'The editing page stays where you choose during playback. FOLLOW is optional. Knobs, faders and mode buttons are available to MIDI learn; the 16 step buttons and navigation arrows keep their sequencer functions. The LCXL output is used for LEDs only.');
   const message = h('p', 'hint', box);
@@ -76,7 +77,7 @@ export function installLcxl(app: App, chrome: HTMLElement): void {
     else strip.remove();
     if (c.enabled) {
       const s = c.surface.state(), start = c.surface.page * 16;
-      text.textContent = `LCXL · ${s.track + 1}: ${s.trackName} · STEPS ${start + 1}–${Math.min(start + 16, s.steps)}${!c.connected ? ' · DISCONNECTED' : !c.templateReady ? ' · SELECT FACTORY 1' : ''}`;
+      text.textContent = `LCXL · ${s.track + 1}: ${s.trackName} · STEPS ${start + 1}–${Math.min(start + 16, s.steps)}${!c.connected ? ' · DISCONNECTED' : !c.templateReady ? ' · SELECT FACTORY 1' : ''}${c.heldMessage ? ' · ' + c.heldMessage : ''}`;
       previousTrack.disabled = s.track <= 0; nextTrack.disabled = s.track >= s.tracks - 1;
       previousPage.disabled = start <= 0; nextPage.disabled = start + 16 >= s.steps;
       follow.classList.toggle('on', c.surface.follow); follow.setAttribute('aria-pressed', String(c.surface.follow));

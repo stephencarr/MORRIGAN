@@ -173,3 +173,117 @@ test('learns a mode-button transport toggle alongside the fixed sequencer profil
   await send(page, [0x98, 41, 127]); await send(page, [0x98, 41, 0]);
   await expect.poll(() => led(page, 24)).toBe(28);
 });
+
+async function mapKnob(page: Page, target: string, cc = 13) {
+  await page.evaluate(t => (window as unknown as W).clatter.midiLearn.start(t), target);
+  await send(page, [0xb8, cc, 0]);
+}
+
+test('hold and twist locks an existing step without touching the base sound; release, undo and mouse unlock stay in sync', async ({ page }) => {
+  const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
+  await boot(page); await enable(page);
+  await page.evaluate(() => { const a = (window as unknown as W).clatter; a.clearPattern(); a.toggleCell(a.ui.track, 0); });
+  await mapKnob(page, `param:${PAR.FILTER_FREQ_1}`);
+  const base = await page.evaluate(p => (window as unknown as W).clatter.project.kit.synth.params[p], PAR.FILTER_FREQ_1);
+  const lock = () => page.evaluate(p => { const a = (window as unknown as W).clatter; return a.stepSound(a.ui.track, 0)?.locks?.[p]; }, PAR.FILTER_FREQ_1);
+  await page.evaluate(() => (window as unknown as W).clatter.setView('sound'));
+  await page.locator('[data-test=play]').click();
+  await send(page, [0x98, 41, 127]);
+  expect(await page.evaluate(() => { const a = (window as unknown as W).clatter; return !!a.hitAt(a.ui.track, 0); })).toBe(true);
+  // A value equal to the base still needs to create an explicit lock.
+  await send(page, [0xb8, 13, base!]); expect(await lock()).toBe(base);
+  await send(page, [0xb8, 13, 20]); await send(page, [0xb8, 13, 91]);
+  expect(await lock()).toBe(91);
+  expect(await page.evaluate(p => (window as unknown as W).clatter.project.kit.synth.params[p], PAR.FILTER_FREQ_1)).toBe(base);
+  await expect(page.locator('[data-test=lcxl-strip]')).toContainText('LOCK · STEP 1 · FILTER CUTOFF');
+  await expect(page.locator(`[data-lock="${PAR.FILTER_FREQ_1}"]`)).toBeVisible();
+  await send(page, [0x88, 41, 64]);
+  await page.locator('[data-test=play]').click();
+  await expect.poll(() => led(page, 24)).toBe(13);
+  await page.evaluate(() => (window as unknown as W).clatter.undo());
+  expect(await lock()).toBeUndefined();
+  expect(await page.evaluate(() => { const a = (window as unknown as W).clatter; return !!a.hitAt(a.ui.track, 0); })).toBe(true);
+  await expect.poll(() => led(page, 24)).toBe(28);
+  await page.evaluate(() => (window as unknown as W).clatter.redo()); expect(await lock()).toBe(91);
+  await send(page, [0xb8, 13, 33]);
+  expect(await page.evaluate(p => (window as unknown as W).clatter.project.kit.synth.params[p], PAR.FILTER_FREQ_1)).toBe(33);
+  expect(await lock()).toBe(91);
+  await page.locator(`[data-lock="${PAR.FILTER_FREQ_1}"]`).getByRole('button', { name: '×', exact: true }).click();
+  await expect.poll(() => led(page, 24)).toBe(28);
+  expect(errors).toEqual([]);
+});
+
+test('locks the held page and matching voice parameter, creates empty hits, and saves the locks', async ({ page }) => {
+  await boot(page); await enable(page);
+  await page.evaluate(() => (window as unknown as W).clatter.clearPattern());
+  await mapKnob(page, `param:${PAR.FILTER_FREQ_1}`);
+  await send(page, [0xb8, 105, 127]); await send(page, [0xb8, 105, 0]); // Snare track.
+  await send(page, [0xb8, 107, 127]); await send(page, [0xb8, 107, 0]); // Second page.
+  const before = await page.evaluate(() => [...(window as unknown as W).clatter.project.kit.synth.params]);
+  await send(page, [0x98, 41, 127]); await send(page, [0xb8, 13, 47]); await send(page, [0x98, 41, 0]);
+  const read = () => page.evaluate(p => { const a = (window as unknown as W).clatter; return { hit: !!a.hitAt(a.ui.track, 16), lock: a.stepSound(a.ui.track, 16)?.locks?.[p], first: a.stepSound(a.ui.track, 0) }; }, PAR.FILTER_FREQ_4);
+  expect(await read()).toEqual({ hit: true, lock: 47, first: undefined });
+  await page.evaluate(() => { const a = (window as unknown as W).clatter; a.setCursor({ track: a.ui.track, step: 17 }); a.setStepVoice(0); });
+  await send(page, [0x98, 42, 127]); await send(page, [0xb8, 13, 55]); await send(page, [0x98, 42, 0]);
+  expect(await page.evaluate(p => { const a = (window as unknown as W).clatter; return a.stepSound(a.ui.track, 17)?.locks?.[p]; }, PAR.FILTER_FREQ_1)).toBe(55);
+  expect(await page.evaluate(() => [...(window as unknown as W).clatter.project.kit.synth.params])).toEqual(before);
+  await expect.poll(() => led(page, 24)).toBe(13);
+  await page.evaluate(() => (window as unknown as W).clatter.flushSave());
+  await page.reload(); await page.waitForSelector('#transport');
+  await page.evaluate(() => { const a = (window as unknown as W).clatter; a.selectTrack(a.project.tracks[1]!.id); });
+  expect(await read()).toEqual({ hit: true, lock: 47, first: undefined });
+});
+
+test('unmapped and global knobs cannot accidentally delete held steps or change global values', async ({ page }) => {
+  await boot(page); await enable(page);
+  await page.evaluate(() => { const a = (window as unknown as W).clatter; a.clearPattern(); a.toggleCell(a.ui.track, 0); });
+  await mapKnob(page, 'tempo');
+  const tempo = await page.evaluate(() => (window as unknown as W).clatter.project.tempo);
+  await send(page, [0x98, 41, 127]); await send(page, [0xb8, 13, 127]);
+  await expect(page.locator('[data-test=lcxl-strip]')).toContainText('USE A KNOB MAPPED TO A VOICE SYNTH PARAMETER');
+  await send(page, [0x98, 41, 0]);
+  await send(page, [0x98, 41, 127]); await send(page, [0xb8, 14, 127]); await send(page, [0x98, 41, 0]);
+  expect(await page.evaluate(() => (window as unknown as W).clatter.project.tempo)).toBe(tempo);
+  expect(await page.evaluate(() => { const a = (window as unknown as W).clatter; return { hit: !!a.hitAt(a.ui.track, 0), sound: a.stepSound(a.ui.track, 0) }; })).toEqual({ hit: true, sound: undefined });
+  await mapKnob(page, `param:${PAR.FILTER_FREQ_1}`);
+  const base = await page.evaluate(p => { const a = (window as unknown as W).clatter; a.selectTrack(a.project.tracks[2]!.id); return a.project.kit.synth.params[p]; }, PAR.FILTER_FREQ_1);
+  expect(await page.evaluate(() => (window as unknown as W).clatter.track.sound.mode)).toBe('sample');
+  await send(page, [0x98, 41, 127]); await send(page, [0xb8, 13, 110]);
+  await expect(page.locator('[data-test=lcxl-strip]')).toContainText('NOT AVAILABLE FOR THE HELD VOICE');
+  await send(page, [0x98, 41, 0]);
+  expect(await page.evaluate(p => (window as unknown as W).clatter.project.kit.synth.params[p], PAR.FILTER_FREQ_1)).toBe(base);
+  expect(await page.evaluate(() => { const a = (window as unknown as W).clatter; return !!a.hitAt(a.ui.track, 0); })).toBe(false);
+});
+
+test('undo or a focus change while holding cancels further edits until release, and disconnect closes the gesture', async ({ page }) => {
+  await boot(page); await enable(page);
+  await page.evaluate(() => (window as unknown as W).clatter.clearPattern());
+  await mapKnob(page, `param:${PAR.FILTER_FREQ_1}`);
+  const base = await page.evaluate(p => (window as unknown as W).clatter.project.kit.synth.params[p], PAR.FILTER_FREQ_1);
+  await send(page, [0x98, 41, 127]); await send(page, [0xb8, 13, 60]);
+  await page.evaluate(() => (window as unknown as W).clatter.undo());
+  await send(page, [0xb8, 13, 90]); await send(page, [0x98, 41, 0]);
+  expect(await page.evaluate(() => { const a = (window as unknown as W).clatter; return !!a.hitAt(a.ui.track, 0); })).toBe(false);
+  expect(await page.evaluate(p => (window as unknown as W).clatter.project.kit.synth.params[p], PAR.FILTER_FREQ_1)).toBe(base);
+  await send(page, [0x98, 41, 127]);
+  await page.evaluate(() => { const a = (window as unknown as W).clatter; a.selectTrack(a.project.tracks[1]!.id); });
+  await send(page, [0xb8, 13, 90]); await send(page, [0x98, 41, 0]);
+  expect(await page.evaluate(() => { const a = (window as unknown as W).clatter; return !!a.hitAt(a.ui.track, 0); })).toBe(false);
+  await send(page, [0x98, 41, 127]); await send(page, [0xb8, 13, 60]);
+  await page.evaluate(() => (window as unknown as W).lcxlTest.connection('input', false));
+  await expect(page.locator('[data-test=lcxl-strip]')).toContainText('DISCONNECTED');
+  await page.evaluate(() => (window as unknown as W).clatter.undo());
+  expect(await page.evaluate(() => { const a = (window as unknown as W).clatter; return !!a.hitAt(a.ui.track, 0); })).toBe(false);
+});
+
+test('holding several steps applies locks as one undoable gesture', async ({ page }) => {
+  await boot(page); await enable(page);
+  await page.evaluate(() => (window as unknown as W).clatter.clearPattern());
+  await mapKnob(page, `param:${PAR.FILTER_FREQ_1}`);
+  await send(page, [0x98, 41, 127]); await send(page, [0x98, 42, 127]);
+  await send(page, [0xb8, 13, 76]);
+  await send(page, [0x98, 41, 0]); await send(page, [0x88, 42, 0]);
+  expect(await page.evaluate(p => { const a = (window as unknown as W).clatter; return [0, 1].map(s => a.stepSound(a.ui.track, s)?.locks?.[p]); }, PAR.FILTER_FREQ_1)).toEqual([76, 76]);
+  await page.evaluate(() => (window as unknown as W).clatter.undo());
+  expect(await page.evaluate(() => { const a = (window as unknown as W).clatter; return [0, 1].some(s => a.hitAt(a.ui.track, s)); })).toBe(false);
+});
