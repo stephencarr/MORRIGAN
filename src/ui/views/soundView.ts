@@ -88,6 +88,8 @@ export function soundView(app: App, screen: HTMLElement): View {
       const stop = (e: Event) => e.stopPropagation();
       ms.addEventListener('click', stop);
       ms.addEventListener('dblclick', stop);
+      const hear = button(lp, ms, '▶︎', () => void app.audition(tr.id), { cls: 'small', title: 'Audition this track through its current mixer and FX routing' });
+      hear.dataset.test = 'sound-track-audition';
       button(lp, ms, 'M', () => app.setTrackMix(tr.id, { mute: !x().mix.mute }), { cls: 'small', on: () => x().mix.mute, title: 'Mute' });
       button(lp, ms, 'S', () => app.setTrackMix(tr.id, { solo: !x().mix.solo }), { cls: 'small', on: () => x().mix.solo, title: 'Solo' });
       const met = h('div', 'meter h sidemeter', li);
@@ -96,6 +98,7 @@ export function soundView(app: App, screen: HTMLElement): View {
         const s = x();
         li.classList.toggle('on', app.ui.track === s.id);
         nm.textContent = s.name;
+        hear.setAttribute('aria-label', `Audition ${s.name}`);
         const sc = trackScaleState(app.project, s).spec;
         lock.textContent = sc ? '♪ ' + shortScale(sc) : '';
         lock.title = sc ? 'Scale-locked: ' + describeScale(sc) : '';
