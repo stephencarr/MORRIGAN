@@ -1,0 +1,44 @@
+--- a/tests/baseline/test_installed_files.py
++++ b/tests/baseline/test_installed_files.py
+@@ -29,8 +29,14 @@
+ if not sysconfdir.startswith("/"):
+     sysconfdir = f"{prefix}/{sysconfdir}"
+ 
++libdir = options["libdir"]
++if not libdir.startswith("/"):
++    libdir = f"{prefix}/{libdir}"
++
+ 
+ def relative(path):
++    if path.startswith(libdir + "/"):
++        return "{libdir}" + path[len(libdir):]
+     if path.startswith(sysconfdir + "/"):
+         return "{sysconfdir}" + path[len(sysconfdir):]
+     if path.startswith(prefix + "/"):
+@@ -44,7 +50,12 @@
+     print(f"{baseline}: {len(installed)} files")
+     sys.exit(0)
+ 
+-expected = [line for line in baseline.read_text().splitlines() if line]
++expected = [relative(line.replace("{prefix}", prefix)
++                     .replace("{sysconfdir}", sysconfdir).replace("{libdir}", libdir))
++            for line in baseline.read_text().splitlines() if line]
++# This optional Intel Mac helper is absent on ARM and when gnu-efi is missing.
++if not any(target["name"] == "setos.efi" for target in introspect("--targets")):
++    expected = [path for path in expected if not path.endswith("/setos.efi")]
+ # The After Dark helper is optional: -Dafterdark=disabled, or a machine without
+ # cargo under the default auto, simply does not build it. The baseline lists it
+ # for the package and CI, where cargo is a build dependency.
+--- a/tests/baseline/installed-files.txt
++++ b/tests/baseline/installed-files.txt
+@@ -81,8 +81,8 @@
+ {prefix}/lib/systemd/user/zacos9-hdmi-watchdog.service
+ {prefix}/lib/systemd/user/zacos9-update-check.service
+ {prefix}/lib/systemd/user/zacos9-update-check.timer
+-{prefix}/lib/x86_64-linux-gnu/gtk-3.0/modules/libzacos9-appmenu.so
+-{prefix}/lib/x86_64-linux-gnu/qt6/plugins/styles/zacos9style.so
++{libdir}/gtk-3.0/modules/libzacos9-appmenu.so
++{libdir}/qt6/plugins/styles/zacos9style.so
+ {prefix}/lib/zacos9/setos.efi
+ {prefix}/libexec/zacos9/zacos9-accounts-helper
+ {prefix}/libexec/zacos9/zacos9-appstore-helper

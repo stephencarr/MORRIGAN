@@ -1,0 +1,872 @@
+{
+  "status": "VERIFIED",
+  "scope": "real Pure Data DSP and loopback control, rendered to WAV without an audio device",
+  "capture_point": "original DAC input, after LIRA voice mix, delay/distortion and master volume",
+  "host": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "python": "3.12.14"
+  },
+  "upstream": {
+    "lira_revision": "6a6b6cbc3359a20d7741c9270c7690ab6b21c92a",
+    "pd_version": "Pd-0.56.2 (\"\") compiled 06:10:48 Nov 16 2026",
+    "bootstrap_pd_revision": "b1ff370c87b579f80130a9cafbf27cd890e90882"
+  },
+  "command": [
+    "/workspace/MORRIGAN-OS/.cache/upstream/pure-data/bin/pd",
+    "-nogui",
+    "-noprefs",
+    "-noaudio",
+    "-nomidi",
+    "-nrt",
+    "-r",
+    "48000",
+    "-open",
+    "/workspace/artifacts/morrigan-first-sound-final/runtime/morrigan-runtime.pd"
+  ],
+  "process_exit_code": 0,
+  "transport": {
+    "type": "Pd FUDI over TCP",
+    "bind": "127.0.0.1",
+    "port": 57563,
+    "protocol_version": 1
+  },
+  "controls_sent": [
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-1",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-1",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-2",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-2",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-3",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-3",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-4",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-4",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-5",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-5",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-6",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-6",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-7",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-7",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-8",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-8",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sharp-12",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "mod-12",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "fast-12",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "source-12",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sharp-34",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "mod-34",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "fast-34",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "source-34",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sharp-56",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "mod-56",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "fast-56",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "source-56",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sharp-78",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "mod-78",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "fast-78",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "source-78",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "pitch-1234",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "hold-1234",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "pitch-5678",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "hold-5678",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "vibrato",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "drv",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "dst-mix",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "vol",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "f-a",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "f-b",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "time-1",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "time-2",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "feedback",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "del-mix",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "mod-1",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "mod-2",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "switch",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "total-fb",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "andor",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "link",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "lfo-wav",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "quantize",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "del-mod",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "fast-12",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "source-12",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "fast-34",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "source-34",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "fast-56",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "source-56",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "fast-78",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "source-78",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-1",
+      "value": 64
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-2",
+      "value": 64
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-3",
+      "value": 64
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-4",
+      "value": 64
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-5",
+      "value": 64
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-6",
+      "value": 64
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-7",
+      "value": 64
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-8",
+      "value": 64
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "pitch-1234",
+      "value": 64
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "pitch-5678",
+      "value": 64
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "vol",
+      "value": 64
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-1",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-1",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-2",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-2",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-3",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-3",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-4",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-4",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-5",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-5",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-6",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-6",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-7",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-7",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-8",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-8",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-1",
+      "value": 24
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-1",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "tune-1",
+      "value": 96
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-1",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-2",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-3",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-4",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-5",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-6",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-7",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-8",
+      "value": 1
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-1",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-2",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-3",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-4",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-5",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-6",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-7",
+      "value": 0
+    },
+    {
+      "version": 1,
+      "device": "morrigan.virtual.first-sound",
+      "control": "sensor-8",
+      "value": 0
+    }
+  ],
+  "pd_control_messages_observed": 134,
+  "audio": {
+    "sample_rate": 48000,
+    "channels": 2,
+    "sample_width_bits": 16,
+    "frames": 579072,
+    "duration_seconds": 12.064,
+    "whole_file_peak": 0.199462890625,
+    "whole_file_near_full_scale_samples": 0,
+    "sha256": "94f7a19af64c754a1c0fb919043a1aac3429047823486a1dee4cd6ec277618a6",
+    "channel_layout": "upstream mono duplicated to left and right",
+    "segments": {
+      "silence-before": {
+        "frames": 19232,
+        "rms": 0.0,
+        "peak": 0.0,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 0.0
+      },
+      "voice-1": {
+        "frames": 19232,
+        "rms": 0.0772916902122496,
+        "peak": 0.10687255859375,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 79.86688851913478
+      },
+      "release-1": {
+        "frames": 9632,
+        "rms": 0.0,
+        "peak": 0.0,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 0.0
+      },
+      "voice-2": {
+        "frames": 19232,
+        "rms": 0.07734455816083992,
+        "peak": 0.10687255859375,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 77.37104825291182
+      },
+      "release-2": {
+        "frames": 9632,
+        "rms": 0.0,
+        "peak": 0.0,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 0.0
+      },
+      "voice-3": {
+        "frames": 19232,
+        "rms": 0.03837329732141335,
+        "peak": 0.063232421875,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 239.6006655574043
+      },
+      "release-3": {
+        "frames": 9632,
+        "rms": 0.0,
+        "peak": 0.0,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 0.0
+      },
+      "voice-4": {
+        "frames": 19232,
+        "rms": 0.03841779854251489,
+        "peak": 0.063262939453125,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 239.6006655574043
+      },
+      "release-4": {
+        "frames": 9568,
+        "rms": 0.0,
+        "peak": 0.0,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 0.0
+      },
+      "voice-5": {
+        "frames": 19232,
+        "rms": 0.0244752600240258,
+        "peak": 0.041290283203125,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 436.7720465890183
+      },
+      "release-5": {
+        "frames": 9696,
+        "rms": 0.0,
+        "peak": 0.0,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 0.0
+      },
+      "voice-6": {
+        "frames": 19168,
+        "rms": 0.024485053756692902,
+        "peak": 0.041290283203125,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 435.7262103505843
+      },
+      "release-6": {
+        "frames": 9632,
+        "rms": 0.0,
+        "peak": 0.0,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 0.0
+      },
+      "voice-7": {
+        "frames": 19232,
+        "rms": 0.024470889641524888,
+        "peak": 0.040985107421875,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 838.6023294509151
+      },
+      "release-7": {
+        "frames": 9632,
+        "rms": 0.0,
+        "peak": 0.0,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 0.0
+      },
+      "voice-8": {
+        "frames": 19232,
+        "rms": 0.02446205678998909,
+        "peak": 0.0408935546875,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 970.8818635607321
+      },
+      "release-8": {
+        "frames": 9632,
+        "rms": 0.0,
+        "peak": 0.0,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 0.0
+      },
+      "tune-low": {
+        "frames": 19296,
+        "rms": 0.10214530320461773,
+        "peak": 0.111236572265625,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 9.950248756218905
+      },
+      "tune-high": {
+        "frames": 19234,
+        "rms": 0.025467935129035727,
+        "peak": 0.0428466796875,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 384.3194343350317
+      },
+      "all-eight": {
+        "frames": 19228,
+        "rms": 0.08870840163400193,
+        "peak": 0.199462890625,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 344.4976076555024
+      },
+      "silence-after": {
+        "frames": 19234,
+        "rms": 0.0,
+        "peak": 0.0,
+        "near_full_scale_samples": 0,
+        "upcrossing_hz": 0.0
+      }
+    },
+    "checks": {
+      "headless_patch_loaded": true,
+      "no_pd_errors": true,
+      "eight_individual_voices_non_silent": true,
+      "eight_individual_releases_silent": true,
+      "initial_silence": true,
+      "release_silence": true,
+      "control_changes_pitch": true,
+      "all_eight_simultaneous": true,
+      "no_observed_clipping": true,
+      "two_channels_match_upstream_mono_duplication": true
+    },
+    "passed": true
+  },
+  "limitations": [
+    "Not Raspberry Pi hardware validation",
+    "No physical audio or MIDI devices",
+    "No DAC latency or underrun measurement",
+    "Upstream output is mono duplicated to two channels",
+    "Clipping check covers this conservative preset only",
+    "Loopback developer transport is not a sandbox against other local users"
+  ]
+}
