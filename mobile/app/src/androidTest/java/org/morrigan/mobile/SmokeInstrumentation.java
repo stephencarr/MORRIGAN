@@ -64,8 +64,21 @@ public final class SmokeInstrumentation extends Instrumentation {
             activity = startActivitySync(new Intent(context, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             bound = context.bindService(new Intent(context, InstrumentService.class), connection, Context.BIND_AUTO_CREATE);
             if (!connected.await(10, TimeUnit.SECONDS)) throw new AssertionError("Service bind timed out");
+            runOnMainSync(service::restoreFactory);
             startAudio(context);
-            expect(() -> service.running(), "Foreground service starts native LIRA and AudioTrack");
+            expect(() -> service.running(), "Factory preset starts native LIRA and AudioTrack");
+            service.setTouch(3, true);
+            expect(() -> rms(service.scopeSnapshot()) > 0.001, "Upstream musical preset produces PCM");
+            runOnMainSync(service::stopAudio);
+            expect(() -> !service.active(), "Factory sound stops cleanly");
+            // Exact gate/silence checks use an explicitly dry test setup, not app defaults.
+            for (LiraControls.Spec spec : LiraControls.ALL) {
+                float value = spec.id.startsWith("tune-") || spec.id.startsWith("pitch-") || spec.id.equals("vol") ? 64
+                        : spec.id.startsWith("fast-") || spec.id.startsWith("source-") ? 1 : 0;
+                service.setParameter(spec.id, value);
+            }
+            startAudio(context);
+            expect(() -> service.running(), "Calibration preset starts native LIRA and AudioTrack");
             expect(() -> rms(service.scopeSnapshot()) < 0.0001, "Startup is silent");
             for (int voice = 1; voice <= 8; voice++) {
                 service.setTouch(voice, true);
@@ -129,7 +142,7 @@ public final class SmokeInstrumentation extends Instrumentation {
             result.putString("stream", "FAIL: " + error + "\nPassed: " + passed);
             result.putString("result", "FAIL");
         } finally {
-            if (service != null) runOnMainSync(service::stopAudio);
+            if (service != null) runOnMainSync(() -> { service.stopAudio(); service.restoreFactory(); });
             if (bound) context.unbindService(connection);
             if (activity != null) { Activity closing = activity; runOnMainSync(closing::finish); }
             try (FileOutputStream file = context.openFileOutput("smoke-result.json", Context.MODE_PRIVATE)) {

@@ -19,6 +19,8 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 import org.morrigan.mobile.midi.UsbMidiController;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /** User-started foreground playback; no boot receiver, network or microphone access. */
 public final class InstrumentService extends Service implements UsbMidiController.Sink {
@@ -42,6 +44,8 @@ public final class InstrumentService extends Service implements UsbMidiControlle
     private volatile String currentProfile = "notes";
     private boolean foreground;
     private boolean destroyed;
+    private final Map<String, Float> parameters = new LinkedHashMap<>();
+    private final Runnable saveParameters = this::persistParameters;
 
     public final class LocalBinder extends Binder { public InstrumentService service() { return InstrumentService.this; } }
 
@@ -54,6 +58,12 @@ public final class InstrumentService extends Service implements UsbMidiControlle
         preferences = getSharedPreferences("instrument", MODE_PRIVATE);
         volume = Math.max(0, Math.min(1, preferences.getFloat("volume", 0.5f)));
         currentProfile = preferences.getString("profile", "notes");
+        parameters.putAll(LiraControls.factory(volume * 127));
+        for (LiraControls.Spec spec : LiraControls.ALL) {
+            float saved = preferences.getFloat("parameter." + spec.id, parameters.get(spec.id));
+            if (spec.accepts(saved)) parameters.put(spec.id, saved);
+        }
+        volume = parameters.get("vol") / 127;
         audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         focus = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
                 .setAudioAttributes(AudioEngine.ATTRIBUTES)
@@ -111,7 +121,8 @@ public final class InstrumentService extends Service implements UsbMidiControlle
         clearGates();
         midi.panic();
         wakeLock.acquire();
-        engine.start(volume);
+        // Copy the complete displayed state; tuning/FX edits made while stopped are retained.
+        engine.start(parameterSnapshot());
     }
 
     public void stopAudio() {
@@ -122,7 +133,7 @@ public final class InstrumentService extends Service implements UsbMidiControlle
     }
 
     private void finishPlayback() {
-        preferences.edit().putFloat("volume", volume).putString("profile", currentProfile).apply();
+        persistParameters();
         if (wakeLock.isHeld()) wakeLock.release();
         audioManager.abandonAudioFocusRequest(focus);
         if (foreground) { stopForeground(STOP_FOREGROUND_REMOVE); foreground = false; }
@@ -147,10 +158,7 @@ public final class InstrumentService extends Service implements UsbMidiControlle
             if (index < 0 || index >= 8) return;
             midiGates[index] = value > 0 && engine.running();
             engine.control(name, touch[index] || midiGates[index] ? 1 : 0);
-        } else {
-            if ("vol".equals(name)) volume = Math.max(0, Math.min(1, value / 127));
-            engine.control(name, value);
-        }
+        } else setParameter(name, value);
     }
 
     @Override public void onStatus(String status) { midiStatus = status; }
@@ -159,14 +167,53 @@ public final class InstrumentService extends Service implements UsbMidiControlle
         clearGates();
         if (engine == null) return;
         for (int i = 1; i <= 8; i++) engine.control("sensor-" + i, 0);
-        engine.control("hold-1234", 0);
-        engine.control("hold-5678", 0);
+        setParameter("hold-1234", 0);
+        setParameter("hold-5678", 0);
     }
 
     public void setVolume(float normalized) {
         if (!Float.isFinite(normalized)) return;
-        volume = Math.max(0, Math.min(1, normalized));
-        engine.control("vol", volume * 127);
+        setParameter("vol", Math.max(0, Math.min(1, normalized)) * 127);
+    }
+
+    public synchronized void setParameter(String name, float value) {
+        LiraControls.Spec spec = LiraControls.find(name);
+        if (spec == null || !spec.accepts(value)) return;
+        parameters.put(name, value);
+        if ("vol".equals(name)) volume = value / 127;
+        engine.control(name, value);
+        main.removeCallbacks(saveParameters);
+        main.postDelayed(saveParameters, 500);
+    }
+
+    private synchronized Map<String, Float> parameterSnapshot() {
+        return new LinkedHashMap<>(parameters);
+    }
+
+    /** A single snapshot keeps UI values and input ownership in agreement. */
+    public synchronized Map<String, Float> values() {
+        Map<String, Float> snapshot = parameterSnapshot();
+        for (int i = 0; i < 8; i++) snapshot.put("sensor-" + (i + 1), touch[i] || midiGates[i] ? 1f : 0f);
+        return snapshot;
+    }
+
+    public void restoreFactory() {
+        // Resetting a sound never raises the master level or leaves a gate held.
+        releaseTouches();
+        midi.panic();
+        synchronized (this) {
+            for (Map.Entry<String, Float> entry : LiraControls.factory(volume * 127).entrySet())
+                setParameter(entry.getKey(), entry.getValue());
+        }
+    }
+
+    private synchronized void persistParameters() {
+        if (preferences == null) return;
+        main.removeCallbacks(saveParameters);
+        SharedPreferences.Editor editor = preferences.edit().putFloat("volume", volume).putString("profile", currentProfile);
+        for (Map.Entry<String, Float> entry : parameters.entrySet())
+            editor.putFloat("parameter." + entry.getKey(), entry.getValue());
+        editor.apply();
     }
 
     public void toggleProfile() {
@@ -183,6 +230,8 @@ public final class InstrumentService extends Service implements UsbMidiControlle
     public float volume() { return volume; }
     public String profile() { return currentProfile; }
     public int underruns() { return engine.underruns(); }
+    public long limitedSamples() { return engine.limitedSamples(); }
+    public long invalidSamples() { return engine.invalidSamples(); }
 
     @Override public void onDestroy() {
         destroyed = true;
@@ -192,7 +241,7 @@ public final class InstrumentService extends Service implements UsbMidiControlle
         if (engine != null) { engine.stop(); engine.awaitStopped(); }
         if (wakeLock.isHeld()) wakeLock.release();
         audioManager.abandonAudioFocusRequest(focus);
-        preferences.edit().putFloat("volume", volume).putString("profile", currentProfile).apply();
+        persistParameters();
         super.onDestroy();
     }
 }

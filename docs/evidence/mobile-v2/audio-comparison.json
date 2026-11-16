@@ -1,0 +1,255 @@
+{
+  "status": "VERIFIED",
+  "scope": "Independent direct-libpd original-patch reference versus production native adapter; same pinned Pd/source/settings/sample schedule on host, not Pixel hardware or standalone-GUI comparison",
+  "source_patch_sha256": "f0a7443e75140a16a44e46ce2957f99d751fe495dc8387c7a082f8f71dbf3392",
+  "source_parameters_sha256": "72cedb5a3c2848478a7be9a93cf8ccbd3269f5ce6978dfa85ddd7b05521bb7cf",
+  "factory_parameters": {
+    "tune-1": 0.0,
+    "tune-2": 78.0,
+    "tune-3": 74.0,
+    "tune-4": 36.0,
+    "tune-5": 27.0,
+    "tune-6": 57.0,
+    "tune-7": 60.0,
+    "tune-8": 51.0,
+    "fast-12": 1.0,
+    "fast-34": 1.0,
+    "fast-56": 1.0,
+    "fast-78": 1.0,
+    "sharp-12": 14.3774,
+    "sharp-34": 43.1321,
+    "sharp-56": 103.038,
+    "sharp-78": 71.8868,
+    "mod-12": 0.0,
+    "mod-34": 0.0,
+    "mod-56": 0.0,
+    "mod-78": 0.0,
+    "source-12": 0.0,
+    "source-34": 0.0,
+    "source-56": 0.0,
+    "source-78": 0.0,
+    "pitch-1234": 66.0,
+    "pitch-5678": 65.0,
+    "hold-1234": 0.0,
+    "hold-5678": 0.0,
+    "switch": 0.0,
+    "total-fb": 0.0,
+    "vibrato": 1.0,
+    "drv": 86.0,
+    "dst-mix": 69.0,
+    "vol": 127.0,
+    "f-a": 42.0,
+    "f-b": 64.0,
+    "andor": 1.0,
+    "link": 1.0,
+    "time-1": 94.5745,
+    "time-2": 56.7447,
+    "feedback": 54.0426,
+    "del-mix": 67.5532,
+    "mod-1": 40.7358,
+    "mod-2": 47.9245,
+    "del-mod": 2.0,
+    "lfo-wav": 0.0,
+    "quantize": 0.0
+  },
+  "application_deviation": {
+    "vol": 64,
+    "sensors": "released"
+  },
+  "factory": {
+    "production": {
+      "frames": 552000,
+      "rms": 0.02115391249016916,
+      "peak": 0.14186033606529236
+    },
+    "original_reference": {
+      "frames": 552000,
+      "rms": 0.02115391249016916,
+      "peak": 0.14186033606529236
+    },
+    "difference": {
+      "max_absolute_difference": 0.0,
+      "rms_difference": 0.0,
+      "identical_samples": 1104000,
+      "total_samples": 1104000
+    }
+  },
+  "all_47_parameters": {
+    "production": {
+      "frames": 950400,
+      "rms": 0.014529226352927166,
+      "peak": 0.0690198466181755
+    },
+    "original_reference": {
+      "frames": 950400,
+      "rms": 0.014529226352927166,
+      "peak": 0.0690198466181755
+    },
+    "difference": {
+      "max_absolute_difference": 0.0,
+      "rms_difference": 0.0,
+      "identical_samples": 1900800,
+      "total_samples": 1900800
+    }
+  },
+  "previous_dry_calibration": {
+    "metrics": {
+      "frames": 552000,
+      "rms": 0.03472101569462267,
+      "peak": 0.20188623666763306
+    },
+    "difference_from_factory": {
+      "max_absolute_difference": 0.28824615478515625,
+      "rms_difference": 0.040618253719383726,
+      "identical_samples": 0,
+      "total_samples": 1104000
+    }
+  },
+  "cross_modulation": {
+    "production": {
+      "frames": 408000,
+      "rms": 0.030433472267426695,
+      "peak": 0.06156831607222557
+    },
+    "original_reference": {
+      "frames": 408000,
+      "rms": 0.030433472267426695,
+      "peak": 0.06156831607222557
+    },
+    "difference": {
+      "max_absolute_difference": 0.0,
+      "rms_difference": 0.0,
+      "identical_samples": 816000,
+      "total_samples": 816000
+    },
+    "first_two_seconds_match_baseline": {
+      "max_absolute_difference": 0.0,
+      "rms_difference": 0.0,
+      "identical_samples": 192000,
+      "total_samples": 192000
+    },
+    "sections": [
+      {
+        "seconds": [
+          0,
+          2
+        ],
+        "mod_all_four_pairs": 0,
+        "difference_from_identically_timed_mod_zero_baseline": {
+          "max_absolute_difference": 0.0,
+          "rms_difference": 0.0,
+          "identical_samples": 172800,
+          "total_samples": 172800
+        },
+        "production_texture": {
+          "rms": 0.031129403161498478,
+          "normalized_first_difference": 0.03585652079294978
+        },
+        "baseline_texture": {
+          "rms": 0.031129403161498478,
+          "normalized_first_difference": 0.03585652079294978
+        }
+      },
+      {
+        "seconds": [
+          2,
+          4
+        ],
+        "mod_all_four_pairs": 48,
+        "difference_from_identically_timed_mod_zero_baseline": {
+          "max_absolute_difference": 0.06570346653461456,
+          "rms_difference": 0.023785176767363667,
+          "identical_samples": 0,
+          "total_samples": 172800
+        },
+        "production_texture": {
+          "rms": 0.03128334029311161,
+          "normalized_first_difference": 0.03570645015520764
+        },
+        "baseline_texture": {
+          "rms": 0.032064104650392354,
+          "normalized_first_difference": 0.034308299317410355
+        }
+      },
+      {
+        "seconds": [
+          4,
+          6
+        ],
+        "mod_all_four_pairs": 96,
+        "difference_from_identically_timed_mod_zero_baseline": {
+          "max_absolute_difference": 0.11877992376685143,
+          "rms_difference": 0.046256302351150684,
+          "identical_samples": 0,
+          "total_samples": 172800
+        },
+        "production_texture": {
+          "rms": 0.03197272567981857,
+          "normalized_first_difference": 0.0392740333541023
+        },
+        "baseline_texture": {
+          "rms": 0.031222778786043938,
+          "normalized_first_difference": 0.03568369112475238
+        }
+      },
+      {
+        "seconds": [
+          6,
+          8
+        ],
+        "mod_all_four_pairs": 0,
+        "difference_from_identically_timed_mod_zero_baseline": {
+          "max_absolute_difference": 0.1088605560362339,
+          "rms_difference": 0.04950736215608926,
+          "identical_samples": 0,
+          "total_samples": 172800
+        },
+        "production_texture": {
+          "rms": 0.03125807805430084,
+          "normalized_first_difference": 0.03559770994761822
+        },
+        "baseline_texture": {
+          "rms": 0.03199181517821232,
+          "normalized_first_difference": 0.034451154636801595
+        }
+      }
+    ],
+    "normalized_texture_change_at_mod_96": 0.0035903422293499243,
+    "normalized_texture_relative_change_at_mod_96": 0.10061577477503286,
+    "settings": {
+      "held_voices": "all eight",
+      "source_all_pairs": 0,
+      "source_labels": [
+        "34",
+        "12",
+        "78",
+        "56"
+      ],
+      "switch": 0,
+      "total-fb": 0,
+      "master_vol": 32,
+      "drv": 0,
+      "dst-mix": 0,
+      "del-mix": 0,
+      "feedback": 0,
+      "vibrato": 0,
+      "other_parameters": "original factory"
+    },
+    "release_seconds": [
+      8,
+      8.5
+    ],
+    "interpretation": "Only MOD changes at 2, 4 and 6 seconds; the control run holds MOD=0 throughout. No normalization. This proves original-Pd voice cross-modulation, not an exact SOMA hardware model."
+  },
+  "vibrato_is_binary": true,
+  "listening_files": {
+    "original_reference": "reference.wav",
+    "production": "morrigan.wav",
+    "previous_dry_preset": "old-dry.wav",
+    "restored_factory_preset": "restored-factory.wav",
+    "cross_modulation_reference": "cross-modulation-reference.wav",
+    "cross_modulation_production": "cross-modulation-morrigan.wav",
+    "cross_modulation_control_baseline": "cross-modulation-mod-zero-baseline.wav"
+  },
+  "listening_note": "No loudness normalization. Factory/dry listening pairs use master vol=64; the isolated cross-modulation demonstration uses vol=32 and bypasses output effects."
+}

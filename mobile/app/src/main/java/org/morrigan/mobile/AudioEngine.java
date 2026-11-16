@@ -33,16 +33,17 @@ final class AudioEngine {
     private volatile String status = "STOPPED";
     private volatile float[] scope = new float[512];
     private volatile int underruns;
+    private volatile long limitedSamples, invalidSamples;
 
     AudioEngine(Context context, Listener listener) {
         this.context = context.getApplicationContext();
         this.listener = listener;
     }
 
-    synchronized boolean start(float volume) {
+    synchronized boolean start(Map<String, Float> parameters) {
         if (thread != null) return false;
         pending.clear();
-        pending.put("vol", Math.max(0, Math.min(1, volume)) * 127);
+        pending.putAll(parameters);
         requested = true;
         status = "STARTING LIRA";
         thread = new Thread(this::run, "morrigan-audio");
@@ -67,11 +68,20 @@ final class AudioEngine {
     String status() { return status; }
     float[] snapshot() { return scope; }
     int underruns() { return underruns; }
+    long limitedSamples() { return limitedSamples; }
+    long invalidSamples() { return invalidSamples; }
 
     void awaitStopped() {
         Thread worker = thread;
         if (worker != null && worker != Thread.currentThread()) {
             try { worker.join(1500); } catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); }
+        }
+    }
+
+    private void drainControls() {
+        for (Map.Entry<String, Float> command : pending.entrySet()) {
+            if (pending.remove(command.getKey(), command.getValue()))
+                NativeLira.setParameter(command.getKey(), command.getValue());
         }
     }
 
@@ -122,18 +132,19 @@ final class AudioEngine {
             initialized = true;
             track = audio;
             if (!requested) return;
+            // Apply the displayed preset before any block can reach the output.
+            drainControls();
             audio.play();
             running = true;
             underruns = 0;
+            limitedSamples = invalidSamples = 0;
             status = "LIRA · " + sampleRate + " HZ · " + audio.getBufferSizeInFrames() + " FR";
             float[] block = new float[frames * 2];
             float[] ring = new float[1024];
             int write = 0;
             int blocks = 0;
             while (requested) {
-                for (Map.Entry<String, Float> command : pending.entrySet()) {
-                    if (pending.remove(command.getKey(), command.getValue())) NativeLira.setParameter(command.getKey(), command.getValue());
-                }
+                drainControls();
                 NativeLira.process(block, frames);
                 int position = 0;
                 while (position < block.length && requested) {
@@ -150,6 +161,8 @@ final class AudioEngine {
                     for (int i = 0; i < display.length; i++) display[i] = ring[(write + i * 2) % ring.length];
                     scope = display;
                     underruns = audio.getUnderrunCount();
+                    limitedSamples = NativeLira.limitedSamples();
+                    invalidSamples = NativeLira.invalidSamples();
                 }
             }
         } catch (Exception | LinkageError error) {

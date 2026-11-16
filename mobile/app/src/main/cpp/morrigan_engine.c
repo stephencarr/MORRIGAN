@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-only */
 #include "morrigan_engine.h"
+#include "lira_factory.h"
 #include "z_libpd.h"
 #include <math.h>
 #include <pthread.h>
@@ -37,20 +38,11 @@ static int owned(void) {
 }
 
 static int parameter_max(const char *name) {
-    static const char *pots[] = {"sharp-12", "sharp-34", "sharp-56", "sharp-78",
-        "mod-12", "mod-34", "mod-56", "mod-78", "pitch-1234", "pitch-5678",
-        "hold-1234", "hold-5678", "vibrato", "drv", "dst-mix", "vol", "f-a", "f-b",
-        "time-1", "time-2", "feedback", "del-mix", "mod-1", "mod-2"};
-    static const char *switches[] = {"fast-12", "fast-34", "fast-56", "fast-78", "switch",
-        "total-fb", "andor", "link", "lfo-wav", "quantize"};
-    static const char *selectors[] = {"source-12", "source-34", "source-56", "source-78", "del-mod"};
     size_t n;
     if (!name) return -1;
-    if (strlen(name) == 6 && strncmp(name, "tune-", 5) == 0 && name[5] >= '1' && name[5] <= '8') return 127;
     if (strlen(name) == 8 && strncmp(name, "sensor-", 7) == 0 && name[7] >= '1' && name[7] <= '8') return 1;
-    for (n = 0; n < sizeof(pots)/sizeof(*pots); n++) if (!strcmp(name, pots[n])) return 127;
-    for (n = 0; n < sizeof(switches)/sizeof(*switches); n++) if (!strcmp(name, switches[n])) return 1;
-    for (n = 0; n < sizeof(selectors)/sizeof(*selectors); n++) if (!strcmp(name, selectors[n])) return 2;
+    for (n = 0; n < sizeof(lira_parameters)/sizeof(*lira_parameters); n++)
+        if (!strcmp(name, lira_parameters[n].name)) return lira_parameters[n].maximum;
     return -1;
 }
 
@@ -67,24 +59,19 @@ int morrigan_parameter(const char *name, float value) {
 }
 
 static int defaults(void) {
-    const char *zero[] = {"sharp-12", "sharp-34", "sharp-56", "sharp-78", "mod-12", "mod-34", "mod-56", "mod-78",
-        "hold-1234", "hold-5678", "vibrato", "drv", "dst-mix", "f-a", "f-b", "time-1", "time-2",
-        "feedback", "del-mix", "mod-1", "mod-2", "switch", "total-fb", "andor", "link", "lfo-wav", "quantize", "del-mod"};
-    const char *fast[] = {"fast-12", "fast-34", "fast-56", "fast-78"};
-    const char *source[] = {"source-12", "source-34", "source-56", "source-78"};
     size_t i;
     char name[16];
-    for (i = 0; i < sizeof(zero)/sizeof(*zero); i++) if (morrigan_parameter(zero[i], 0)) return -1;
-    for (i = 0; i < 4; i++) {
-        if (morrigan_parameter(fast[i], 1) || morrigan_parameter(source[i], 1)) return -1;
+    /* Keep the original musical preset. Only master volume is lowered; the
+       caller may restore its persisted master value before audible output. */
+    for (i = 0; i < sizeof(lira_parameters)/sizeof(*lira_parameters); i++) {
+        const LiraParameter *p = &lira_parameters[i];
+        if (morrigan_parameter(p->name, !strcmp(p->name, "vol") ? 64 : p->factory)) return -1;
     }
     for (i = 1; i <= 8; i++) {
         snprintf(name, sizeof(name), "sensor-%zu", i);
         if (morrigan_parameter(name, 0)) return -1;
-        snprintf(name, sizeof(name), "tune-%zu", i);
-        if (morrigan_parameter(name, 64)) return -1;
     }
-    return morrigan_parameter("pitch-1234", 64) || morrigan_parameter("pitch-5678", 64) || morrigan_parameter("vol", 64);
+    return 0;
 }
 
 int morrigan_initialize(int sample_rate, const char *patch_directory) {

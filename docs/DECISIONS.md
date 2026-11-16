@@ -27,3 +27,9 @@ The user's later instructions select an ordinary Android app with a small classi
 - Start audio only after the user presses Start. Stop on audio-focus loss or noisy output-route changes; never automatically resume after process death.
 - Keep the small host following the [PdDroidParty review](DROIDPARTY.md); adopting its patch UI would still require a scope renderer and lifecycle validation. A compatible wrapper remains a possible later addition.
 - Deliver a debug APK and source branch for device testing. Android runtime and hardware acceptance remain open until tests actually execute; native host and static packaging results do not substitute for them.
+
+### Mobile sound and full-panel correction
+
+Version 0.2 restores the original LIRA musical startup settings. The previous dry calibration preset proved engine operation but was an unsuitable musical default. Tests now explicitly choose their calibration settings and compare factory output/47-control sweeps against a separate direct-libpd reference. App-level volume remains conservative and reset preserves the user's current master level.
+
+Expose all 47 original parameters in a compact module panel, with a 48dp real-audio scope, native precision editors and eight momentary pads. The service owns validated, persistent control state; MIDI and touch edits are reflected on-screen. Small or landscape viewports may scroll rather than shrink controls indefinitely. No new synthesis or replacement LIRA engine is introduced.

@@ -2,13 +2,13 @@
 
 ## Implementation and ownership
 
-The Android service owns one audio worker. That worker alone calls `NativeLira.initialize`, `setParameter`, `process` and `shutdown`. MIDI and touch input queue named values to it; Canvas rendering never executes DSP. Native code verifies thread ownership and rejects cross-thread access rather than racing libpd.
+The Android service owns one audio worker. That worker alone calls `NativeLira.initialize`, `setParameter`, `process` and `shutdown`. MIDI and panel controls queue named values to it; UI rendering never executes DSP. Native code verifies thread ownership and rejects cross-thread access rather than racing libpd.
 
 `NativeLira` loads `libmorrigan_lira.so`, which statically links libpd. It opens the **unmodified** upstream standalone `_LIRA-8.pd` and uses `libpd_getdollarzero` to address its instance-local `<id>-r-<parameter>` receivers. The original oscillators, envelopes, mixing, effects, GUI-control forwarding objects and `dac~` remain intact. There is no network listener, generated oscillator, browser runtime, copied Macintosh software or external Pd plugin dependency.
 
 The engine has zero audio inputs and two outputs. LIRA's original mono output is duplicated into left/right; this is not a native stereo sound field. Processing happens in 64-frame Pd ticks, accepting 64..4096 frames per JNI call. The Android service chooses the streaming AudioTrack configuration and feeds these actual PCM samples to the scope.
 
-Initialization lets upstream loadbang/preset events settle into discarded buffers, then applies a moderate initial preset with all eight sensors released, volume 64/127 and feedback/distortion/holds off. Output clamps nonfinite samples to zero and finite excursions to ±0.95. This is a last-resort ceiling, not a transparent mastering limiter. The test preset does not hit it. Root audio/MIDI scheduling, hardware buffering and service lifetime are documented separately in the mobile app record.
+Initialization lets upstream loadbang/preset events settle into discarded buffers, then applies the original 47-value musical preset with all eight sensors released and native master volume 64/127. The Android service applies the full displayed/saved control state before the first output block (initial app master 63.5/127). Version 0.1 mistakenly used the dry engineering-test preset here; version 0.2 restores the upstream tuning, distortion, delay and modulation settings. See [the original-engine comparison](MOBILE_AUDIO_COMPARISON.md). Output clamps nonfinite samples to zero and finite excursions to ±0.95. This is a last-resort ceiling, not a transparent mastering limiter. The test preset does not hit it. Root audio/MIDI scheduling, hardware buffering and service lifetime are documented separately in the mobile app record.
 
 ## Pinned sources and build
 
@@ -41,21 +41,20 @@ python3 mobile/tools/prepare_lira.py
 cmake -S mobile/app/src/main/cpp -B mobile/.cache/host-build \
   -DCMAKE_BUILD_TYPE=Release
 cmake --build mobile/.cache/host-build -j 4
-mobile/.cache/host-build/morrigan_native_test \
-  mobile/app/build/generated/liraAssets/lira /tmp/morrigan-mobile-native.wav
+python3 mobile/tests/native/run_test.py --output /tmp/morrigan-mobile-native.wav
 ```
 
-Observed on Debian 13 x86-64, 2026-11-16:
+Observed on Debian 13 x86-64, 2026-11-16, after restoring factory startup. This regression explicitly applies its dry calibration settings inside the test; production defaults retain the musical preset:
 
 - All eight voices individually audible; every release returned measured output to silence.
 - All eight voices together audible.
-- Tuning control 24 → 96 changed positive-going zero crossings from approximately 11.97 to 382.98/second. This measures a causal waveform change, not precision fundamental frequency.
+- Tuning control 24 → 96 changed positive-going zero crossings from approximately 11.97 to 386.97/second. This measures a causal waveform change, not precision fundamental frequency.
 - A 9.6-second, 48 kHz, 16-bit, two-channel WAV was produced. Left/right samples matched the upstream mono duplication.
-- Whole-run float peak: **0.220499337**; zero limited or nonfinite output samples.
+- Whole-run float peak: **0.234861925**; zero limited or nonfinite output samples.
 - Invalid selector, nonfinite/range/discrete values, invalid frame size, uninitialized/double-initialized states and wrong-thread processing were rejected.
 - Engine shutdown and reinitialization both passed.
 
-Session artifacts: `/workspace/artifacts/morrigan-mobile-native.wav` and `/workspace/artifacts/morrigan-mobile-native.log`. The many sample assertions in the log are not separate user-facing test cases.
+Session artifacts: `/workspace/artifacts/morrigan-mobile-v2-native.wav` and `/workspace/artifacts/mobile-v2-native.log`. The many sample assertions in the log are not separate user-facing test cases.
 
 ## Verification boundary
 

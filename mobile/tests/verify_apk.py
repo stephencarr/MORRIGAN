@@ -8,6 +8,7 @@ import struct
 import zipfile
 
 PATCH_SHA256 = "f0a7443e75140a16a44e46ce2957f99d751fe495dc8387c7a082f8f71dbf3392"
+PARAMETERS_SHA256 = "72cedb5a3c2848478a7be9a93cf8ccbd3269f5ce6978dfa85ddd7b05521bb7cf"
 
 
 def verify(path):
@@ -39,13 +40,15 @@ def verify(path):
             assert len(archive.read("assets/licenses/" + licence)) > 100, f"Missing licence: {licence}"
         patch = archive.read("assets/lira/_LIRA-8.pd")
         assert hashlib.sha256(patch).hexdigest() == PATCH_SHA256, "Packaged patch differs from pinned original"
+        preset = archive.read("assets/lira/parameters.txt")
+        assert hashlib.sha256(preset).hexdigest() == PARAMETERS_SHA256, "Packaged factory preset was modified"
         sources = json.loads(archive.read("assets/sources.json"))
         assert sources["lira"] == "6a6b6cbc3359a20d7741c9270c7690ab6b21c92a"
         assert sources["libpd"] == "ba0dc63262901d658af8bbda5e619a60fa975e78"
         assert sources["pure_data"] == "f009fd8d7b537e209e09898d487fdf1bf547da2b"
     return {"status": "PASS", "apk": str(path), "bytes": len(data),
             "sha256": hashlib.sha256(data).hexdigest(), "libraries": libraries,
-            "original_lira_patch": True, "licence_assets": True,
+            "original_lira_patch": True, "original_lira_preset": True, "licence_assets": True,
             "scope": "static packaging checks; not physical Pixel or USB validation"}
 
 

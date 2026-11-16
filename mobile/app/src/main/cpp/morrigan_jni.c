@@ -55,3 +55,13 @@ JNIEXPORT void JNICALL Java_org_morrigan_mobile_NativeLira_shutdown(JNIEnv *env,
     (void)type;
     if (morrigan_shutdown()) throw_error(env, "java/lang/IllegalStateException");
 }
+
+JNIEXPORT jlong JNICALL Java_org_morrigan_mobile_NativeLira_limitedSamples(JNIEnv *env, jclass type) {
+    (void)env; (void)type;
+    return (jlong)morrigan_limited_samples();
+}
+
+JNIEXPORT jlong JNICALL Java_org_morrigan_mobile_NativeLira_invalidSamples(JNIEnv *env, jclass type) {
+    (void)env; (void)type;
+    return (jlong)morrigan_invalid_samples();
+}

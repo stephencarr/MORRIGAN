@@ -18,6 +18,27 @@ static void require(int condition, const char *what) {
     if (!condition) { fprintf(stderr, "FAIL: %s (%s)\n", what, morrigan_error()); exit(1); }
 }
 
+/* A dry calibration preset belongs in the test, never production startup. */
+static void calibration_preset(void) {
+    const char *zero[] = {"sharp-12","sharp-34","sharp-56","sharp-78","mod-12","mod-34","mod-56","mod-78",
+        "hold-1234","hold-5678","vibrato","drv","dst-mix","f-a","f-b","time-1","time-2",
+        "feedback","del-mix","mod-1","mod-2","switch","total-fb","andor","link","lfo-wav","quantize","del-mod"};
+    const char *pairs[] = {"12","34","56","78"};
+    char name[24];
+    for (unsigned i=0;i<sizeof(zero)/sizeof(*zero);i++) require(!morrigan_parameter(zero[i],0),"calibration zero");
+    for (unsigned i=0;i<4;i++) {
+        snprintf(name,sizeof(name),"fast-%s",pairs[i]); require(!morrigan_parameter(name,1),"calibration envelope");
+        snprintf(name,sizeof(name),"source-%s",pairs[i]); require(!morrigan_parameter(name,1),"calibration source");
+    }
+    for (unsigned i=1;i<=8;i++) {
+        snprintf(name,sizeof(name),"sensor-%u",i); require(!morrigan_parameter(name,0),"calibration release");
+        snprintf(name,sizeof(name),"tune-%u",i); require(!morrigan_parameter(name,64),"calibration tune");
+    }
+    require(!morrigan_parameter("pitch-1234",64) && !morrigan_parameter("pitch-5678",64) && !morrigan_parameter("vol",64),"calibration pitch and volume");
+    float settling[128];
+    for (int i=0;i<375;i++) require(!morrigan_process(settling,64),"calibration settling");
+}
+
 static void little16(unsigned value) { fputc(value & 255, recording); fputc((value >> 8) & 255, recording); }
 static void little32(unsigned value) { little16(value & 65535); little16(value >> 16); }
 
@@ -70,12 +91,14 @@ int main(int argc, char **argv) {
     float block[128];
     require(morrigan_process(block, 64) != 0, "uninitialized engine fails");
     require(morrigan_initialize(48000, argv[1]) == 0, "initialize original LIRA");
+    calibration_preset();
     require(morrigan_initialize(48000, argv[1]) != 0, "double initialization rejected");
     require(morrigan_parameter("sensor-1; pd quit", 1) != 0, "unknown selector rejected");
     require(morrigan_parameter("vol", NAN) != 0, "NaN rejected");
     require(morrigan_parameter("vol", INFINITY) != 0, "infinity rejected");
     require(morrigan_parameter("vol", 128) != 0, "range rejected");
     require(morrigan_parameter("sensor-1", 0.5f) != 0, "fractional gate rejected");
+    require(morrigan_parameter("vibrato", 2) != 0, "vibrato is a binary toggle");
     require(morrigan_process(block, 63) != 0, "non-Pd block rejected");
     pthread_t other;
     void *thread_result = NULL;

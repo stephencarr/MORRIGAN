@@ -1,37 +1,49 @@
-# MORRIGAN Mobile display
+# MORRIGAN Mobile: complete LIRA panel
 
-`mobile/app/src/main/java/org/morrigan/mobile/ScopeView.java` is an original Android Canvas interface. It uses Android's built-in monospace typeface and geometric drawing; no Macintosh ROM, system software, copied Apple icon, proprietary font or upstream desktop is included. This is a small Mac-inspired instrument display, not Mac OS emulation or a port of ZacOS.
+`mobile/app/src/main/java/org/morrigan/mobile/LiraPanelView.java` presents all **47 original LIRA parameters**, eight momentary voice pads and a small live output scope. It replaces the earlier scope-only interaction with a compact instrument module. The layout follows the upstream panel's functional grouping: Hyper-LFO, Mod-Delay, Distortion/master, global switches, voice-group hold/pitch, four paired source/modulation/sharpness/rate sections, and eight tuning controls.
 
-The amber screen contains one oscilloscope window, audio and USB MIDI status, eight momentary audition pads, Start/Stop, Panic, MIDI profile selection, screen pinning and master volume. Every visible action has a callback; the decorative title/menu strip does not pretend to expose an application menu.
+The presentation is original Android UI in amber, using the built-in monospace typeface and geometric drawing. No Macintosh ROM, system software, copied Apple icon, proprietary font or copied upstream screenshot is included. This is a Mac-inspired musical instrument, not Mac OS emulation or a ZacOS port.
+
+## Interaction
+
+- Every parameter is visible as a named value button. Tapping a continuous parameter opens a native precision slider with 0.01 resolution and ±1 buttons. Changes are sent immediately. Fractional upstream preset values are preserved until deliberately adjusted.
+- Tapping a choice cycles its actual upstream options. Holding it opens an explicit choice dialog. Labels come from `LiraControls`, including the original modulation routing choices.
+- Swipe to scroll on short/landscape displays or at larger font sizes. Dragging over the panel does not change parameters; adjustment happens in the precision dialog, avoiding accidental edits while scrolling.
+- Eight voice pads are momentary and can be held together. Their lit state reflects the application's merged touch/MIDI sensor state. MIDI changes also update all parameter values.
+- Start/Stop reflects the service's active state, including startup. Panic delegates to the instrument owner. LIRA Reset requests the original sound while preserving the current master level. Profile selects standard notes or LCXL Mk2.
+- Tapping either status line opens its complete audio/MIDI diagnostic text. The compact status lines may ellipsize visually; their stored/accessibility text remains complete.
+
+The scope displays genuine supplied output samples, with a labeled bounded visual gain of 1–16×. It does not synthesize a fake trace or alter audio gain.
 
 ## Integration contract
 
-- Construct `ScopeView(Context)` and call `setListener(Listener)` from the UI thread.
-- The listener supplies `onStartStop()`, `onPanic()`, `onVoice(int voice, boolean down)`, `onVolume(float normalized)`, `onProfileToggle()` and `onPinRequested()`.
-- Voice numbers are 1 through 8; volume is finite and clamped to 0 through 1.
-- Call `update(float[] samples, String audioStatus, String midiStatus, boolean running, String profile, float volume)` on the UI thread at approximately 30 Hz. The view copies at most 512 mono display samples. It neither reads the audio device nor performs synthesis.
-- Profile strings are `notes` and `lcxl`. The UI requests a toggle; the MIDI/controller owner performs the actual change.
-- Pin requests delegate to the Activity. Android screen pinning is a reversible dedicated-use option; it is not equivalent to a device-owner kiosk or a replacement operating system.
+Construct `LiraPanelView(Context)` and set its `Listener` on the UI thread. Callbacks are:
 
-## Touch and accessibility
+```text
+onStartStop()
+onPanic()
+onVoice(int voice1to8, boolean down)
+onParameter(String id, float value)
+onProfileToggle()
+onFactoryReset()
+```
 
-The layout uses density-independent coordinates, with 44 dp action targets. Audition pads use four columns on narrow displays and eight where the available width permits. The window adapts to portrait/landscape dimensions supplied by its Activity; the Activity remains responsible for Android system-bar/cutout insets.
+Call `update(float[] samples, String audioStatus, String midiStatus, boolean running, boolean active, String profile, Map<String, Float> values)` on the UI thread. The view copies at most 512 scope samples, reads every catalogue parameter and optionally `sensor-1` through `sensor-8`, and never retains mutable input arrays or maps. The service remains responsible for audio, persistence and MIDI ownership. Controls are disabled until a nonempty state snapshot and listener are available; parameter editing remains available while the engine is stopped, while voice pads require running audio.
 
-Voice pads track each pointer and count multiple fingers on the same pad. The final finger release sends note-off. Leaving a pad releases it; dragging does not silently trigger a neighboring voice. Cancelled touches, lost window focus, detachment, resizing, stopping, Panic and profile changes release held touch voices.
+`LiraControls.ALL` is the shared parameter catalogue. Construction checks that every catalogue parameter appears exactly once; no parameter is hidden in a separate menu. Stable test/accessibility tags are `param:<id>`, `voice:1` through `voice:8`, `start`, `panic`, `profile`, `reset`, `scope`, `audio-status` and `midi-status`. Precision dialogs expose `slider:<id>`, `value:<id>`, `increase:<id>` and `decrease:<id>`.
 
-Pads and Panic are disabled while the engine is stopped. Start, profile selection, master volume and Pin remain available. The scope shows a flat baseline while stopped and sanitizes nonfinite/out-of-range display samples.
+## Layout and accessibility
 
-The plotted trace uses bounded visual gain (1–16×), labeled inside the display, so conservative listening levels remain visible. This changes only the drawn trace, never audio gain or the samples supplied by the engine.
+The full panel uses native Android Buttons, TextViews, SeekBars and dialogs in a ScrollView. Parameters, tuning, audition pads and primary actions use 44 dp minimum heights. The eight side-by-side tuning/pad columns are narrower than 44 dp on a 393 dp display; native precision dialogs provide larger adjustment targets. Heights can grow with text scaling rather than overlap. The Activity applies system-bar/cutout insets; short windows and landscape can scroll to every control.
 
-The custom view exposes virtual accessibility nodes for every action, including a ranged volume control. TalkBack can inspect/activate buttons and adjust volume; activating an audition pad produces a short 180 ms pulse. Tab/left/right move keyboard focus, Enter/Space activates a control, and up/down adjust the focused volume slider. This does not require a keyboard for ordinary operation. Physical TalkBack behavior and Android system-pinning interactions require device/emulator verification.
+Native widgets expose full parameter labels, current values, choice labels and standard accessibility actions. An accessibility/keyboard click on a voice pad produces a short 180 ms audition; ordinary touch holds it until release. Each pad tracks individual pointer IDs, allowing multiple fingers on the same pad without prematurely releasing it. Leaving a pad, cancellation, focus loss, detachment, resizing, stop, reset and profile switching release local touch ownership. Stale delayed accessibility releases cannot release newly pressed voices after a reset. Externally held MIDI notes remain the service/controller's responsibility.
 
 ## Validation boundary
 
-The view compiled successfully against the actual Android API 35 `android.jar` using the installed Java 21 compiler module:
+The view and shared catalogue compiled against the actual Android API 35 `android.jar`. Native Android widget interaction and rasterization tests live in `mobile/app/src/test/java/org/morrigan/mobile/LiraPanelViewTest.java`; the mobile checkpoint report records their observed results and portrait/landscape captures. Compiling or rendering Android widgets on the host is not physical Pixel touch, TalkBack, audio-latency or thermal validation. The graphical thread owns no DSP or audio-device calls.
 
-```sh
-java com.sun.tools.javac.Main -cp /workspace/android-sdk/platforms/android-35/android.jar \
-  -d /tmp/morrigan-scope-classes mobile/app/src/main/java/org/morrigan/mobile/ScopeView.java
-```
+## Recorded panel preview
 
-The compiler reported only deprecated accessibility-API notices; those older methods remain available for the app's minimum Android API. Full application build/runtime verification belongs to the mobile checkpoint report. A Canvas layout is not evidence of Pixel display performance, touch latency or uninterrupted audio. The Activity/service must keep audio independent of the rendering thread and release its own touch ownership when visual lifecycle events occur. The view is not an audio supervisor and does not claim to reset externally held USB MIDI notes.
+Host-rendered Android widgets at 393 × 820 dp, using a recorded LIRA waveform as the scope fixture (not a Pixel capture):
+
+![Complete LIRA panel](evidence/mobile-v2/panel-portrait.png)

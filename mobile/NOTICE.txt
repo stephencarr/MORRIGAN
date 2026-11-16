@@ -1,4 +1,4 @@
-MORRIGAN Mobile 0.1.0 prototype
+MORRIGAN Mobile 0.2.0 prototype
 
 Original MORRIGAN implementation: GPL-3.0-only; full licence in MORRIGAN-COPYING.txt.
 Corresponding source, native build scripts and pinned dependency fetch instructions:

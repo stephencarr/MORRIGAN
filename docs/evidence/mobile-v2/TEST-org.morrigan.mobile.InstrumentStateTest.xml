@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.morrigan.mobile.InstrumentStateTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-11-16T08:59:39.139Z" hostname="bbb57a093e51" time="4.33">
+  <properties/>
+  <testcase name="stoppedEditsAndMidiUpdateTheDisplayedStateWithoutStartingAudio" classname="org.morrigan.mobile.InstrumentStateTest" time="4.125"/>
+  <testcase name="editedParametersAndProfileSurviveServiceRecreation" classname="org.morrigan.mobile.InstrumentStateTest" time="0.091"/>
+  <testcase name="invalidParameterValuesAreRejectedWithoutChangingState" classname="org.morrigan.mobile.InstrumentStateTest" time="0.053"/>
+  <testcase name="factoryResetRestoresAll47ParametersAndPreservesMasterLevel" classname="org.morrigan.mobile.InstrumentStateTest" time="0.061"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

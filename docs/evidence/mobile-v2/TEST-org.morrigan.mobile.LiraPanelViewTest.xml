@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.morrigan.mobile.LiraPanelViewTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-16T08:59:16.570Z" hostname="bbb57a093e51" time="22.361">
+  <properties/>
+  <testcase name="precisionSeekBarEditsAndMidiSnapshotRefreshesVisibleState" classname="org.morrigan.mobile.LiraPanelViewTest" time="9.479"/>
+  <testcase name="landscapeControlsRemainInsideThePanelAndCanBeScrolledIntoView" classname="org.morrigan.mobile.LiraPanelViewTest" time="2.102"/>
+  <testcase name="portraitExposesAll47ControlsAndEveryControlEmitsAValidParameter" classname="org.morrigan.mobile.LiraPanelViewTest" time="5.157"/>
+  <testcase name="actionsAndMomentaryPadsRespectDownUpCancelAndStoppedState" classname="org.morrigan.mobile.LiraPanelViewTest" time="0.413"/>
+  <testcase name="realViewHierarchySplitsTwoFingerGatesAndMidiFeedbackDoesNotRetrigger" classname="org.morrigan.mobile.LiraPanelViewTest" time="5.158"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

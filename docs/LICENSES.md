@@ -59,3 +59,5 @@ The build packages full LIRA, libpd and Pd licence notices, original MORRIGAN GP
 The native build enables the libpd core, without its optional extra libraries or utility executables. Android platform APIs are device-provided. The Gradle wrapper is Apache-2.0 software; its JAR includes the upstream licence. Gradle/AGP, SDK, NDK, JDK, CMake and Ninja are build tools, not packaged app runtimes. Debug signing permits replacement with a user's own build after uninstalling the development package; there is no locked bootloader or restricted installation mechanism.
 
 **VERIFIED:** the packaged licence/provenance files and unmodified LIRA patch pass the APK inspection. This is a local development APK and accompanying source, not a Play Store/public release or an OS image.
+
+The mobile 0.2 host tests add JUnit 4.13.2 and Robolectric 4.18 as **test-only** fetched dependencies; neither becomes a production app dependency or is copied into the source archive. The UI test waveform is generated from the verified LIRA render and records its source hash/frame position. Original UI code replaces the earlier scope view without copying the upstream screenshot.

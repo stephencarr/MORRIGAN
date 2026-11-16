@@ -1,4 +1,6 @@
-# MORRIGAN Mobile verification — 2026-11-16
+# MORRIGAN Mobile 0.1 verification — 2026-11-16
+
+**Historical checkpoint.** Version 0.2 corrects the startup preset and adds the complete LIRA panel; see [current verification](MOBILE_V2_VERIFICATION.md).
 
 ## Outcome
 

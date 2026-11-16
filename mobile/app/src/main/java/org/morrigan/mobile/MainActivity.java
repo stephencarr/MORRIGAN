@@ -15,11 +15,10 @@ import android.os.Looper;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
-public final class MainActivity extends Activity implements ScopeView.Listener {
+public final class MainActivity extends Activity implements LiraPanelView.Listener {
     private final Handler main = new Handler(Looper.getMainLooper());
-    private ScopeView scope;
+    private LiraPanelView scope;
     private InstrumentService service;
     private boolean bound;
     private final ServiceConnection connection = new ServiceConnection() {
@@ -30,8 +29,10 @@ public final class MainActivity extends Activity implements ScopeView.Listener {
     };
     private final Runnable render = new Runnable() {
         @Override public void run() {
-            if (service != null) scope.update(service.scopeSnapshot(), service.status() + " · XRUN " + service.underruns(),
-                    service.midiStatus(), service.running(), service.profile(), service.volume());
+            if (service != null) scope.update(service.scopeSnapshot(), service.status() + " · XRUN " + service.underruns() + " · LIMIT " + service.limitedSamples()
+                            + (service.invalidSamples() > 0 ? " · INVALID " + service.invalidSamples() : ""),
+                    service.midiStatus(), service.running(), service.active(), service.profile(), service.values());
+            else scope.update(null, "CONNECTING TO INSTRUMENT", "USB MIDI: WAITING", false, false, "notes", null);
             main.postDelayed(this, 33);
         }
     };
@@ -40,7 +41,7 @@ public final class MainActivity extends Activity implements ScopeView.Listener {
         super.onCreate(state);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         FrameLayout root = new FrameLayout(this);
-        scope = new ScopeView(this);
+        scope = new LiraPanelView(this);
         scope.setListener(this);
         root.addView(scope, new FrameLayout.LayoutParams(-1, -1));
         root.setOnApplyWindowInsetsListener((view, insets) -> {
@@ -97,10 +98,7 @@ public final class MainActivity extends Activity implements ScopeView.Listener {
 
     @Override public void onPanic() { if (service != null) service.stopAudio(); }
     @Override public void onVoice(int voice, boolean down) { if (service != null) service.setTouch(voice, down); }
-    @Override public void onVolume(float normalized) { if (service != null) service.setVolume(normalized); }
+    @Override public void onParameter(String name, float value) { if (service != null) service.setParameter(name, value); }
+    @Override public void onFactoryReset() { if (service != null) service.restoreFactory(); }
     @Override public void onProfileToggle() { if (service != null) service.toggleProfile(); }
-    @Override public void onPinRequested() {
-        try { startLockTask(); }
-        catch (RuntimeException error) { Toast.makeText(this, "Enable app pinning in Android Settings, then try again.", Toast.LENGTH_LONG).show(); }
-    }
 }
