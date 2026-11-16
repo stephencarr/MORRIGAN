@@ -15,3 +15,15 @@
 | No releases, deployments, service installation or upstream pushes | User's execution constraints; source commits and the previously requested new branch are sufficient | Explicit authorization and deployment acceptance tests |
 
 The canonical handoff is product input, not proof that a milestone is complete. Evidence and limitations belong in the reports beside the implementation.
+
+## Mobile checkpoint — stock Pixel 9 app
+
+The user's later instructions select an ordinary Android app with a small classic-computer-inspired interface, scope and eight test pads, intended primarily for a USB MIDI controller. They supersede custom-ROM and desktop-separation requirements for this mobile prototype.
+
+- One native Android Activity and playback foreground service in one app/process. A dedicated worker owns libpd and AudioTrack; UI updates never execute DSP. No replacement OS, Mac emulation or ZacOS is needed for this target.
+- Embed original standalone LIRA through pinned libpd/Pd sources. Keep the graph unmodified; expose a bounded MIDI/touch adapter.
+- Use Android's USB MIDI byte-stream framework with standard note/CC and LCXL Mk2 Factory Template 1 profiles. No MIDI learn or LED feedback in this checkpoint.
+- Use original amber Canvas artwork and the system font. The scope displays actual generated PCM, with display-only auto gain.
+- Start audio only after the user presses Start. Stop on audio-focus loss or noisy output-route changes; never automatically resume after process death.
+- Keep the small host following the [PdDroidParty review](DROIDPARTY.md); adopting its patch UI would still require a scope renderer and lifecycle validation. A compatible wrapper remains a possible later addition.
+- Deliver a debug APK and source branch for device testing. Android runtime and hardware acceptance remain open until tests actually execute; native host and static packaging results do not substitute for them.

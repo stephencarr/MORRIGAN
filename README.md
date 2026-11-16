@@ -2,6 +2,8 @@
 
 A Linux instrument environment: sound first, an independent desktop when needed.
 
+**Stock Pixel 9 app:** the `morrigan-mobile/pixel9` branch adds [MORRIGAN Mobile](mobile/README.md), a native Android LIRA instrument with USB MIDI and an amber oscilloscope. This app does not require the Linux desktop or a phone OS replacement.
+
 This branch starts fresh from the repository reset. It contains a real **headless LIRA/Pure Data audio proof**, a small control adapter, and a separate **ZacOS ARM64 feasibility investigation**. It is not a bootable OS image or a hardware-validated instrument.
 
 ## First sound

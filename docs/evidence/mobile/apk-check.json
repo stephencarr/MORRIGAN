@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "apk": "mobile/app/build/outputs/apk/debug/app-debug.apk",
+  "bytes": 3144879,
+  "sha256": "229842ae6ca8a95bcfaddb2856673f6a209d79b8a0ac23acece1330b8e61e653",
+  "libraries": [
+    {
+      "abi": "arm64-v8a",
+      "zip_data_offset": 65536,
+      "elf_load_alignments": [
+        16384,
+        16384,
+        16384
+      ]
+    },
+    {
+      "abi": "x86_64",
+      "zip_data_offset": 1540096,
+      "elf_load_alignments": [
+        16384,
+        16384,
+        16384
+      ]
+    }
+  ],
+  "original_lira_patch": true,
+  "licence_assets": true,
+  "scope": "static packaging checks; not physical Pixel or USB validation"
+}

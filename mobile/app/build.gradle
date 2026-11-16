@@ -1,0 +1,50 @@
+plugins { id 'com.android.application' }
+
+def prepareLira = tasks.register('prepareLiraAssets', Exec) {
+    workingDir rootProject.projectDir
+    commandLine 'python3', 'tools/prepare_lira.py'
+    doLast {
+        copy {
+            from rootProject.file('../LICENSE')
+            into layout.buildDirectory.dir('generated/liraAssets/licenses')
+            rename { 'MORRIGAN-COPYING.txt' }
+        }
+        copy {
+            from rootProject.file('NOTICE.txt')
+            into layout.buildDirectory.dir('generated/liraAssets/licenses')
+        }
+    }
+}
+
+android {
+    namespace 'org.morrigan.mobile'
+    compileSdk 35
+    ndkVersion '28.0.13004108'
+    defaultConfig {
+        applicationId 'org.morrigan.mobile'
+        minSdk 28
+        targetSdk 35
+        versionCode 1
+        versionName '0.1.0-prototype'
+        ndk { abiFilters 'arm64-v8a', 'x86_64' }
+        externalNativeBuild {
+            cmake { arguments '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON' }
+        }
+        testInstrumentationRunner 'org.morrigan.mobile.SmokeInstrumentation'
+    }
+    externalNativeBuild {
+        cmake { path file('src/main/cpp/CMakeLists.txt'); version '3.31.6' }
+    }
+    sourceSets.main.assets.srcDir layout.buildDirectory.dir('generated/liraAssets')
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    buildTypes {
+        debug { debuggable true }
+        release { minifyEnabled false }
+    }
+    packaging { jniLibs { useLegacyPackaging false } }
+}
+
+tasks.named('preBuild').configure { dependsOn prepareLira }

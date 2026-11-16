@@ -3,3 +3,11 @@ artifacts/
 __pycache__/
 *.py[cod]
 .venv/
+.gradle/
+.cxx/
+build/
+local.properties
+*.apk
+*.aab
+*.jks
+*.keystore

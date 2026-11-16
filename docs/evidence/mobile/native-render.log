@@ -1,0 +1,25 @@
+pd 0.56.5
+LIRA-8 by Mike Moreno DSP 2020
+LIRA-8 by Mike Moreno DSP 2020
+segment initial-silence rms=0.000000000 crossings=0.000
+segment voice-1 rms=0.077145706 crossings=79.787
+segment release-1 rms=0.000000000 crossings=0.000
+segment voice-2 rms=0.077118029 crossings=79.787
+segment release-2 rms=0.000000000 crossings=0.000
+segment voice-3 rms=0.038389209 crossings=243.351
+segment release-3 rms=0.000000000 crossings=0.000
+segment voice-4 rms=0.038383720 crossings=243.351
+segment release-4 rms=0.000000000 crossings=0.000
+segment voice-5 rms=0.024467757 crossings=438.830
+segment release-5 rms=0.000000000 crossings=0.000
+segment voice-6 rms=0.024477657 crossings=438.830
+segment release-6 rms=0.000000000 crossings=0.000
+segment voice-7 rms=0.024478027 crossings=841.755
+segment release-7 rms=0.000000000 crossings=0.000
+segment voice-8 rms=0.024464783 crossings=973.404
+segment release-8 rms=0.000000000 crossings=0.000
+segment tune-low rms=0.102118778 crossings=11.968
+segment tune-high rms=0.025469377 crossings=382.979
+segment all-eight rms=0.103079518 crossings=359.043
+segment final-silence rms=0.000000000 crossings=0.000
+VERIFIED native-core checks=468074 frames=460800 rate=48000 channels=2 peak=0.220499337 limiter=0 invalid=0

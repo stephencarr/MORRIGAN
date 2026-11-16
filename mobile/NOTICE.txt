@@ -1,0 +1,19 @@
+MORRIGAN Mobile 0.1.0 prototype
+
+Original MORRIGAN implementation: GPL-3.0-only; full licence in MORRIGAN-COPYING.txt.
+Corresponding source, native build scripts and pinned dependency fetch instructions:
+https://github.com/stephencarr/MORRIGAN/tree/morrigan-mobile/pixel9
+
+The application incorporates the original LIRA-8 Pure Data patch by Miguel Moreno,
+libpd, and Pure Data by Miller Puckette and contributors. Their BSD-style licences
+and copyright notices are included beside this notice. Exact source revisions are
+recorded in the packaged sources.json and the source preparation script.
+
+The LIRA synthesis graph is unmodified. MORRIGAN supplies native control/audio
+integration, output safety limiting and an original Android user interface.
+Upstream LIRA outputs mono duplicated to two channels.
+
+The interface is original and uses Android's system monospace font. No Macintosh
+ROM, operating-system software, font, icon or other extracted Apple asset is used.
+MORRIGAN is not affiliated with or endorsed by SOMA, Apple, Google, Novation,
+Erica Synths, or the upstream software authors.

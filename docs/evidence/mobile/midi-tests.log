@@ -1,0 +1,18 @@
+PASS fragmentation and interleaved realtime preserve running status
+PASS program change and pressure consume one data byte
+PASS system common cancels running status
+PASS bounded SysEx ignores payload and resynchronizes
+PASS reset discards partial messages and emits one panic
+PASS byte slices and invalid bounds
+PASS standard eight voices and velocity-zero release
+PASS repeated note-on and unmatched off cannot stick or underflow
+PASS device and channel ownership survive another owner releasing
+PASS all-notes-off releases only originating source/channel
+PASS standard CC tunes and master; other messages remain inert
+PASS LCXL factory template channel and exact first button row
+PASS LCXL top knobs only, no invented fader/voice-volume control
+PASS profile switch releases notes and invalid profiles preserve state
+PASS global panic clears all owners, then new notes work
+PASS decoder to mapper integration: packet splits, CC and reset
+PASS out-of-domain mapper input is ignored
+MIDI TESTS: 17 passed

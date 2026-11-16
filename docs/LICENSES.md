@@ -1,6 +1,6 @@
 # Licensing and distribution inventory
 
-Evidence date: 2026-11-16. This is an engineering inventory of the pinned sources below, not a complete distribution clearance. No upstream software, binary package, proprietary ROM, or extracted Macintosh asset is bundled in this repository. Fetches are separate development checkouts.
+Evidence date: 2026-11-16. This is an engineering inventory of the pinned sources below, not a complete distribution clearance. No upstream source checkout, proprietary ROM, or extracted Macintosh asset is tracked in this repository. The mobile build fetches pinned sources and packages LIRA/libpd/Pure Data with their notices; see the mobile inventory below.
 
 Original MORRIGAN implementation code retains the previous repository's **GPL-3.0-only** terms; see the root `LICENSE` and [DECISIONS.md](DECISIONS.md). That choice does not relicense upstream code. Source commits/branches are distinct from distributing a runtime image or binary build.
 
@@ -49,3 +49,13 @@ ZacOS includes tooling to import user-supplied classic Mac themes and emulated s
 ## Release gate (not a blocker for this local proof)
 
 Before distributing an OS image/application bundle: lock the exact package set, collect every copyright/license file, check source and modification notices, include corresponding sources/build recipes and any required installation information, review assets/trademarks, and audit optional extras separately. No public build or image release is part of the present task.
+
+## Mobile development APK
+
+The stock Android prototype uses the same LIRA revision above, **libpd `ba0dc63262901d658af8bbda5e619a60fa975e78`**, and its **Pure Data submodule `f009fd8d7b537e209e09898d487fdf1bf547da2b`** (runtime identifies as 0.56.5). Both native libraries carry BSD-style terms in their top-level licence files. This differs from the earlier Linux proof's Pd revision.
+
+The build packages full LIRA, libpd and Pd licence notices, original MORRIGAN GPLv3 COPYING, NOTICE and exact source revisions in APK assets. The companion source archive includes original project sources/build instructions and the pinned upstream source trees. No PdDroidParty code or assets were copied. The UI uses an original Canvas drawing and Android's installed monospace font, with no bundled font or Apple assets.
+
+The native build enables the libpd core, without its optional extra libraries or utility executables. Android platform APIs are device-provided. The Gradle wrapper is Apache-2.0 software; its JAR includes the upstream licence. Gradle/AGP, SDK, NDK, JDK, CMake and Ninja are build tools, not packaged app runtimes. Debug signing permits replacement with a user's own build after uninstalling the development package; there is no locked bootloader or restricted installation mechanism.
+
+**VERIFIED:** the packaged licence/provenance files and unmodified LIRA patch pass the APK inspection. This is a local development APK and accompanying source, not a Play Store/public release or an OS image.
